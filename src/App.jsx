@@ -163,49 +163,91 @@ function PortfolioView() {
   const [isImporting, setIsImporting] = useState(false);
   const [error, setError] = useState(null);
 
+  // Helper function to save data
+  const saveData = (data) => {
+    try {
+      const dataString = JSON.stringify(data);
+      console.log('Attempting to save data to localStorage...');
+      localStorage.setItem('portfolioData', dataString);
+      console.log('Data saved to localStorage');
+      
+      // Also save to sessionStorage as backup
+      console.log('Saving backup to sessionStorage...');
+      sessionStorage.setItem('portfolioData', dataString);
+      console.log('Data saved to sessionStorage');
+      
+      return true;
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+      try {
+        console.log('Attempting to save to sessionStorage only...');
+        sessionStorage.setItem('portfolioData', JSON.stringify(data));
+        console.log('Data saved to sessionStorage only');
+        return true;
+      } catch (sessionError) {
+        console.error('Error saving to sessionStorage:', sessionError);
+        return false;
+      }
+    }
+  };
+
+  // Helper function to load data
+  const loadData = () => {
+    try {
+      console.log('Attempting to load from localStorage...');
+      const savedData = localStorage.getItem('portfolioData');
+      if (savedData) {
+        console.log('Data found in localStorage');
+        return JSON.parse(savedData);
+      }
+      
+      console.log('Attempting to load from sessionStorage...');
+      const sessionData = sessionStorage.getItem('portfolioData');
+      if (sessionData) {
+        console.log('Data found in sessionStorage');
+        return JSON.parse(sessionData);
+      }
+      
+      console.log('No data found in either storage');
+      return null;
+    } catch (error) {
+      console.error('Error loading data:', error);
+      return null;
+    }
+  };
+
   // On first mount, ensure state is loaded from last scenario
   useEffect(() => {
     try {
-      // Check if localStorage is available
+      // Check if storage is available
       const testKey = 'test_storage';
       try {
-        console.log('Testing localStorage availability...');
+        console.log('Testing storage availability...');
         localStorage.setItem(testKey, 'test');
         localStorage.removeItem(testKey);
-        console.log('localStorage is available');
+        sessionStorage.setItem(testKey, 'test');
+        sessionStorage.removeItem(testKey);
+        console.log('Storage is available');
       } catch (e) {
-        console.error('localStorage is not available:', e);
+        console.error('Storage is not available:', e);
         alert('Warning: Your browser settings are preventing data from being saved. Please check your privacy settings and allow storage for this site.');
         return;
       }
 
-      console.log('Checking for saved data...');
-      const savedData = localStorage.getItem('portfolioData');
+      // Load data using the helper function
+      const data = loadData();
       
-      if (savedData) {
-        console.log('Found saved data, length:', savedData.length);
-        console.log('First 100 characters:', savedData.substring(0, 100));
+      if (data) {
+        console.log('Loading saved data:', {
+          projects: data.projects.length,
+          valueStreams: data.valueStreams.length,
+          resourceTypes: data.resourceTypes.length
+        });
         
-        const data = JSON.parse(savedData);
-        console.log('Parsed data keys:', Object.keys(data));
-        
-        if (data.projects && data.valueStreams && data.resourceTypes) {
-          console.log('Loading saved data:', {
-            projects: data.projects.length,
-            valueStreams: data.valueStreams.length,
-            resourceTypes: data.resourceTypes.length
-          });
-          
-          setProjects(data.projects);
-          setValueStreams(data.valueStreams);
-          setResourceTypes(data.resourceTypes);
-          console.log('State updated with saved data');
-        } else {
-          console.log('Saved data missing required keys, using demo data');
-          setProjects(initialProjects);
-          setValueStreams(initialValueStreams);
-          setResourceTypes(initialResourceTypes);
-        }
+        setProjects(data.projects);
+        setValueStreams(data.valueStreams);
+        setResourceTypes(data.resourceTypes);
+        console.log('State updated with saved data');
       } else {
         console.log('No saved data found, using demo data');
         setProjects(initialProjects);
@@ -332,7 +374,6 @@ function PortfolioView() {
         throw new Error('No file selected');
       }
       
-      // Read file as ArrayBuffer first to handle potential CORS issues
       const buffer = await file.arrayBuffer();
       const text = new TextDecoder().decode(buffer);
       console.log('File read successfully:', text.substring(0, 100) + '...');
@@ -345,48 +386,28 @@ function PortfolioView() {
       }
       console.log('Data validation passed. Proceeding with import...');
       
-      // Store the imported data in localStorage with error handling
-      try {
-        // First try to clear any existing data
-        console.log('Clearing existing localStorage data...');
-        localStorage.removeItem('portfolioData');
-        
-        // Then store the new data
-        console.log('Storing new data in localStorage...');
-        const dataToStore = JSON.stringify(data);
-        console.log('Data to store:', dataToStore.substring(0, 100) + '...');
-        
-        localStorage.setItem('portfolioData', dataToStore);
-        console.log('Data saved to localStorage');
-        
-        // Verify the data was saved
-        console.log('Verifying saved data...');
-        const savedData = localStorage.getItem('portfolioData');
-        if (!savedData) {
-          throw new Error('Failed to verify data was saved');
-        }
-        console.log('Verified saved data:', savedData.substring(0, 100) + '...');
-        
-        // Update state with imported data
-        console.log('Updating application state...');
-        setProjects(data.projects);
-        setValueStreams(data.valueStreams);
-        setResourceTypes(data.resourceTypes);
-        console.log('State updated with imported data');
-        
-        // Show success message
-        alert(`Successfully imported ${data.projects.length} projects, ${data.valueStreams.length} value streams, and ${data.resourceTypes.length} resource types!`);
-        
-        // Small delay to ensure data is saved before reload
-        console.log('Waiting 500ms before reload...');
-        setTimeout(() => {
-          console.log('Reloading page...');
-          window.location.reload();
-        }, 500);
-      } catch (storageError) {
-        console.error('localStorage error:', storageError);
-        throw new Error(`Failed to save data: ${storageError.message}. Please check your browser settings and permissions.`);
+      // Save data using the helper function
+      const saveSuccess = saveData(data);
+      if (!saveSuccess) {
+        throw new Error('Failed to save data to any storage. Please check your browser settings.');
       }
+      
+      // Update state with imported data
+      console.log('Updating application state...');
+      setProjects(data.projects);
+      setValueStreams(data.valueStreams);
+      setResourceTypes(data.resourceTypes);
+      console.log('State updated with imported data');
+      
+      // Show success message
+      alert(`Successfully imported ${data.projects.length} projects, ${data.valueStreams.length} value streams, and ${data.resourceTypes.length} resource types!`);
+      
+      // Small delay to ensure data is saved before reload
+      console.log('Waiting 500ms before reload...');
+      setTimeout(() => {
+        console.log('Reloading page...');
+        window.location.reload();
+      }, 500);
     } catch (err) {
       console.error('Import failed:', err);
       setError(err.message);
