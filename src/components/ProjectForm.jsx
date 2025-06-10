@@ -153,6 +153,30 @@ const ProjectForm = ({
     });
   }, [dateRange]);
 
+  // Add a useEffect to recalculate total hours whenever dependencies change
+  useEffect(() => {
+    if (formData.simpleMode) {
+      const pmHours = formData.autoPopulatePM ? 
+        Math.ceil(formData.estimatedHours * (formData.pmAllocation / 100)) : 
+        formData.pmHours;
+      
+      setFormData(prev => ({
+        ...prev,
+        totalHours: formData.estimatedHours + pmHours
+      }));
+    } else {
+      const pmHours = Math.ceil(formData.estimatedHours * (formData.pmAllocation / 100));
+      const resourceHours = Object.values(formData.resources || {})
+        .filter(resource => resource.id !== 'rt-1')
+        .reduce((sum, resource) => sum + (resource.hours || 0), 0);
+      
+      setFormData(prev => ({
+        ...prev,
+        totalHours: resourceHours + pmHours
+      }));
+    }
+  }, [formData.simpleMode, formData.estimatedHours, formData.pmHours, formData.pmAllocation, formData.autoPopulatePM, formData.resources]);
+
   const calculatePMHours = (resources, pmAllocation) => {
     // Sum up all non-PM resource hours
     const totalNonPMHours = Object.entries(resources || {})
@@ -165,64 +189,32 @@ const ProjectForm = ({
 
   const handleInputChange = (field, value) => {
     if (field === 'simpleMode') {
-      // When switching to simple mode, calculate total from estimated + PM
-      // When switching to detailed mode, calculate total from resources + PM
-      const pmHours = formData.autoPopulatePM ? 
-        Math.ceil(formData.estimatedHours * (formData.pmAllocation / 100)) : 
-        formData.pmHours;
-      const totalHours = value ? 
-        formData.estimatedHours + pmHours : 
-        Object.values(formData.resources || {})
-          .filter(resource => resource.id !== 'rt-1')
-          .reduce((sum, resource) => sum + (resource.hours || 0), 0) + pmHours;
-
       setFormData(prev => ({
         ...prev,
-        simpleMode: value,
-        totalHours
+        simpleMode: value
       }));
       return;
     }
 
     if (field === 'estimatedHours') {
       const estimatedHours = parseInt(value) || 0;
-      const pmHours = formData.autoPopulatePM ? 
-        Math.ceil(estimatedHours * (formData.pmAllocation / 100)) : 
-        formData.pmHours;
       setFormData(prev => ({
         ...prev,
         estimatedHours,
-        pmHours: formData.autoPopulatePM ? pmHours : prev.pmHours,
-        totalHours: formData.simpleMode ? estimatedHours + pmHours : prev.totalHours,
-        resources: {
-          ...prev.resources,
-          'rt-1': { // Project Manager resource type
-            required: 1,
-            allocated: 1,
-            hours: pmHours
-          }
-        }
+        pmHours: prev.autoPopulatePM ? 
+          Math.ceil(estimatedHours * (prev.pmAllocation / 100)) : 
+          prev.pmHours
       }));
       return;
     }
 
     if (field === 'pmAllocation') {
-      const pmHours = formData.autoPopulatePM ? 
-        Math.ceil(formData.estimatedHours * (value / 100)) : 
-        formData.pmHours;
       setFormData(prev => ({
         ...prev,
         pmAllocation: value,
-        pmHours: formData.autoPopulatePM ? pmHours : prev.pmHours,
-        totalHours: formData.simpleMode ? prev.estimatedHours + pmHours : prev.totalHours,
-        resources: {
-          ...prev.resources,
-          'rt-1': { // Project Manager resource type
-            required: 1,
-            allocated: 1,
-            hours: pmHours
-          }
-        }
+        pmHours: prev.autoPopulatePM ? 
+          Math.ceil(prev.estimatedHours * (value / 100)) : 
+          prev.pmHours
       }));
       return;
     }
@@ -231,16 +223,7 @@ const ProjectForm = ({
       const pmHours = parseInt(value) || 0;
       setFormData(prev => ({
         ...prev,
-        pmHours,
-        totalHours: formData.simpleMode ? prev.estimatedHours + pmHours : prev.totalHours,
-        resources: {
-          ...prev.resources,
-          'rt-1': { // Project Manager resource type
-            required: 1,
-            allocated: 1,
-            hours: pmHours
-          }
-        }
+        pmHours
       }));
       return;
     }
@@ -249,19 +232,11 @@ const ProjectForm = ({
       const pmHours = value ? 
         Math.ceil(formData.estimatedHours * (formData.pmAllocation / 100)) : 
         formData.pmHours;
+      
       setFormData(prev => ({
         ...prev,
         autoPopulatePM: value,
-        pmHours: value ? pmHours : prev.pmHours,
-        totalHours: formData.simpleMode ? prev.estimatedHours + pmHours : prev.totalHours,
-        resources: {
-          ...prev.resources,
-          'rt-1': { // Project Manager resource type
-            required: 1,
-            allocated: 1,
-            hours: pmHours
-          }
-        }
+        pmHours
       }));
       return;
     }
