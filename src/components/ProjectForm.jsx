@@ -52,39 +52,21 @@ const ProjectForm = ({
   // Add a state for delete confirmation
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Add a state for the date range
-  const [dateRange, setDateRange] = useState({ from: null, to: null });
+  // Add states for the date pickers
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [isStartDatePickerOpen, setIsStartDatePickerOpen] = useState(false);
+  const [isEndDatePickerOpen, setIsEndDatePickerOpen] = useState(false);
 
   // Add state for editing milestone
   const [editingMilestoneId, setEditingMilestoneId] = useState(null);
   const [editingMilestone, setEditingMilestone] = useState({ name: '', date: '', status: 'planned' });
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-
-  // Add click outside handler for date picker
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      const datePickerButton = document.getElementById('dateRangeButton');
-      const datePickerCalendar = document.getElementById('dateRangeCalendar');
-      
-      if (isDatePickerOpen && 
-          datePickerButton && 
-          !datePickerButton.contains(event.target) && 
-          datePickerCalendar && 
-          !datePickerCalendar.contains(event.target)) {
-        setIsDatePickerOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isDatePickerOpen]);
 
   // Reset form when opening/closing or when editingProject changes
   useEffect(() => {
     if (isOpen) {
-      setIsDatePickerOpen(false);  // Reset date picker state
+      setIsStartDatePickerOpen(false);
+      setIsEndDatePickerOpen(false);
       if (editingProject) {
         // Calculate PM hours based on auto-populate setting
         const pmHours = editingProject.autoPopulatePM ? 
@@ -107,6 +89,8 @@ const ProjectForm = ({
               .filter(resource => resource.id !== 'rt-1')
               .reduce((sum, resource) => sum + (resource.hours || 0), 0) + pmHours
         });
+        setStartDate(editingProject.startDate ? new Date(editingProject.startDate) : null);
+        setEndDate(editingProject.endDate ? new Date(editingProject.endDate) : null);
       } else {
         setFormData({
           name: '',
@@ -128,31 +112,19 @@ const ProjectForm = ({
           estimatedHours: 0,
           pmHours: 0
         });
+        setStartDate(null);
+        setEndDate(null);
       }
     }
   }, [isOpen, editingProject, valueStreamId]);
 
-  // Update dateRange when editingProject changes
-  useEffect(() => {
-    if (isOpen) {
-      if (editingProject && editingProject.startDate && editingProject.endDate) {
-        setDateRange({
-          from: new Date(editingProject.startDate),
-          to: new Date(editingProject.endDate)
-        });
-      } else {
-        setDateRange({ from: null, to: null });
-      }
-    }
-  }, [isOpen, editingProject]);
-
-  // When dateRange changes, update formData
+  // When dates change, update formData
   useEffect(() => {
     setFormData(prev => {
       const newData = {
         ...prev,
-        startDate: dateRange.from ? dateRange.from.toISOString().split('T')[0] : '',
-        endDate: dateRange.to ? dateRange.to.toISOString().split('T')[0] : ''
+        startDate: startDate ? startDate.toISOString().split('T')[0] : '',
+        endDate: endDate ? endDate.toISOString().split('T')[0] : ''
       };
 
       // Calculate PM hours if auto-populate is checked and we have both dates
@@ -174,7 +146,38 @@ const ProjectForm = ({
 
       return newData;
     });
-  }, [dateRange]);
+  }, [startDate, endDate]);
+
+  // Add click outside handlers for date pickers
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const startButton = document.getElementById('startDateButton');
+      const startCalendar = document.getElementById('startDateCalendar');
+      const endButton = document.getElementById('endDateButton');
+      const endCalendar = document.getElementById('endDateCalendar');
+      
+      if (isStartDatePickerOpen && 
+          startButton && 
+          !startButton.contains(event.target) && 
+          startCalendar && 
+          !startCalendar.contains(event.target)) {
+        setIsStartDatePickerOpen(false);
+      }
+      
+      if (isEndDatePickerOpen && 
+          endButton && 
+          !endButton.contains(event.target) && 
+          endCalendar && 
+          !endCalendar.contains(event.target)) {
+        setIsEndDatePickerOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isStartDatePickerOpen, isEndDatePickerOpen]);
 
   // Add a useEffect to recalculate total hours whenever dependencies change
   useEffect(() => {
@@ -473,41 +476,69 @@ const ProjectForm = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-4">
-                {/* Date Range Picker */}
-                <div className="space-y-4">
-                  <Label htmlFor="dateRange">Project Dates *</Label>
+            <div className="space-y-4">
+              <Label>Project Dates *</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="startDate">Start Date</Label>
                   <div className="relative">
                     <Button
-                      id="dateRangeButton"
+                      id="startDateButton"
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal h-10",
-                        !dateRange.from && !dateRange.to && "text-muted-foreground"
+                        !startDate && "text-muted-foreground"
                       )}
-                      onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+                      onClick={() => setIsStartDatePickerOpen(!isStartDatePickerOpen)}
                     >
                       <Calendar className="mr-2 h-4 w-4 shrink-0" />
                       <span>
-                        {dateRange.from && dateRange.to
-                          ? `${format(dateRange.from, "PPP")} - ${format(dateRange.to, "PPP")}`
-                          : "Pick a date range"}
+                        {startDate ? format(startDate, "PPP") : "Pick a date"}
                       </span>
                     </Button>
-                    {isDatePickerOpen && (
-                      <div id="dateRangeCalendar" className="absolute z-50 mt-2">
+                    {isStartDatePickerOpen && (
+                      <div id="startDateCalendar" className="absolute z-50 mt-2">
                         <CalendarComponent
-                          mode="range"
-                          selected={dateRange}
-                          onSelect={(range) => {
-                            setDateRange(range);
-                            if (range?.from && range?.to) {
-                              setIsDatePickerOpen(false);
-                            }
+                          mode="single"
+                          selected={startDate}
+                          onSelect={(date) => {
+                            setStartDate(date);
+                            setIsStartDatePickerOpen(false);
                           }}
                           initialFocus
-                          numberOfMonths={2}
+                          className="bg-white rounded-md border shadow-md"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="endDate">End Date</Label>
+                  <div className="relative">
+                    <Button
+                      id="endDateButton"
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal h-10",
+                        !endDate && "text-muted-foreground"
+                      )}
+                      onClick={() => setIsEndDatePickerOpen(!isEndDatePickerOpen)}
+                    >
+                      <Calendar className="mr-2 h-4 w-4 shrink-0" />
+                      <span>
+                        {endDate ? format(endDate, "PPP") : "Pick a date"}
+                      </span>
+                    </Button>
+                    {isEndDatePickerOpen && (
+                      <div id="endDateCalendar" className="absolute z-50 mt-2">
+                        <CalendarComponent
+                          mode="single"
+                          selected={endDate}
+                          onSelect={(date) => {
+                            setEndDate(date);
+                            setIsEndDatePickerOpen(false);
+                          }}
+                          initialFocus
                           className="bg-white rounded-md border shadow-md"
                         />
                       </div>
@@ -515,7 +546,9 @@ const ProjectForm = ({
                   </div>
                 </div>
               </div>
-              
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="asanaUrl">Asana URL</Label>
                 <Input
