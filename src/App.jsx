@@ -677,40 +677,84 @@ function PortfolioView() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Portfolio Manager</h1>
-          <div className="flex gap-4">
-            <input
-              type="file"
-              accept=".json"
-              onChange={handleFileChange}
-              id="fileInput"
-              style={{ display: 'none' }}
-            />
-            <button
-              onClick={() => document.getElementById('fileInput').click()}
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border-2 bg-transparent shadow-sm duration-200 h-9 px-4 py-2 has-[>svg]:px-3 border-purple-600 text-purple-600 hover:bg-purple-100 focus:bg-purple-200 active:bg-purple-300 hover:text-purple-700 focus:text-purple-800 active:text-purple-900 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-upload h-4 w-4 mr-2" aria-hidden="true">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" x2="12" y1="3" y2="15"></line>
-              </svg>
-              Import Data
-            </button>
-            <button
-              onClick={exportData}
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border-2 bg-transparent shadow-sm duration-200 h-9 px-4 py-2 has-[>svg]:px-3 border-purple-600 text-purple-600 hover:bg-purple-100 focus:bg-purple-200 active:bg-purple-300 hover:text-purple-700 focus:text-purple-800 active:text-purple-900 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download h-4 w-4 mr-2" aria-hidden="true">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" x2="12" y1="15" y2="3"></line>
-              </svg>
-              Export Data
-            </button>
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <header className="bg-gradient-to-r from-purple-600 to-purple-800 text-white shadow-lg">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <img src={fayeLogo} alt="Faye" className="h-8" />
+              <h1 className="text-2xl font-bold">Portfolio Manager</h1>
+            </div>
+            {/* Main Navigation Tabs */}
+            <nav className="flex items-center space-x-2 bg-white/10 rounded-lg px-2 py-1">
+              <Button 
+                variant={currentView === 'portfolio' ? 'secondary' : 'ghost'}
+                onClick={() => setCurrentView('portfolio')}
+                className="text-white hover:text-purple-200"
+              >
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Portfolio View
+              </Button>
+              <Button 
+                variant={currentView === 'resources' ? 'secondary' : 'ghost'}
+                onClick={() => setCurrentView('resources')}
+                className="text-white hover:text-purple-200"
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Resource Planning
+              </Button>
+              <Button 
+                variant={currentView === 'quarterly' ? 'secondary' : 'ghost'}
+                onClick={() => setCurrentView('quarterly')}
+                className="text-white hover:text-purple-200"
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                Quarterly View
+              </Button>
+              <Button 
+                variant={currentView === 'settings' ? 'secondary' : 'ghost'}
+                onClick={() => setCurrentView('settings')}
+                className="text-white hover:text-purple-200"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+              <Button 
+                variant={currentView === 'files' ? 'secondary' : 'ghost'}
+                onClick={() => setCurrentView('files')}
+                className="text-white hover:text-purple-200"
+              >
+                <File className="h-4 w-4 mr-2" />
+                Files
+              </Button>
+            </nav>
+            {/* Import/Export Buttons */}
+            <div className="flex items-center space-x-2">
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleFileChange}
+                id="fileInput"
+                style={{ display: 'none' }}
+              />
+              <Button
+                variant="ghost"
+                onClick={() => document.getElementById('fileInput').click()}
+                className="text-white hover:text-purple-200"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Import
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={exportData}
+                className="text-white hover:text-purple-200"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </div>
           </div>
         </div>
       </header>
