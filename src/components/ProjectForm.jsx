@@ -58,10 +58,33 @@ const ProjectForm = ({
   // Add state for editing milestone
   const [editingMilestoneId, setEditingMilestoneId] = useState(null);
   const [editingMilestone, setEditingMilestone] = useState({ name: '', date: '', status: 'planned' });
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+
+  // Add click outside handler for date picker
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const datePickerButton = document.getElementById('dateRangeButton');
+      const datePickerCalendar = document.getElementById('dateRangeCalendar');
+      
+      if (isDatePickerOpen && 
+          datePickerButton && 
+          !datePickerButton.contains(event.target) && 
+          datePickerCalendar && 
+          !datePickerCalendar.contains(event.target)) {
+        setIsDatePickerOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDatePickerOpen]);
 
   // Reset form when opening/closing or when editingProject changes
   useEffect(() => {
     if (isOpen) {
+      setIsDatePickerOpen(false);  // Reset date picker state
       if (editingProject) {
         // Calculate PM hours based on auto-populate setting
         const pmHours = editingProject.autoPopulatePM ? 
@@ -428,10 +451,10 @@ const ProjectForm = ({
               </div>
               
               <div>
-                <Label htmlFor="valueStream">Value Stream *</Label>
+                <Label htmlFor="valueStreamId">Value Stream *</Label>
                 <Select value={formData.valueStreamId} onValueChange={(value) => handleInputChange('valueStreamId', value)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select value stream" />
+                    <SelectValue placeholder="Select a value stream" />
                   </SelectTrigger>
                   <SelectContent>
                     {valueStreams.map((stream) => (
@@ -449,7 +472,92 @@ const ProjectForm = ({
                 </Select>
               </div>
             </div>
-            
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
+                {/* Date Range Picker */}
+                <div className="space-y-4">
+                  <Label htmlFor="dateRange">Project Dates *</Label>
+                  <div className="relative">
+                    <Button
+                      id="dateRangeButton"
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal h-10",
+                        !dateRange.from && !dateRange.to && "text-muted-foreground"
+                      )}
+                      onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+                    >
+                      <Calendar className="mr-2 h-4 w-4 shrink-0" />
+                      <span>
+                        {dateRange.from && dateRange.to
+                          ? `${format(dateRange.from, "PPP")} - ${format(dateRange.to, "PPP")}`
+                          : "Pick a date range"}
+                      </span>
+                    </Button>
+                    {isDatePickerOpen && (
+                      <div id="dateRangeCalendar" className="absolute z-50 mt-2">
+                        <CalendarComponent
+                          mode="range"
+                          selected={dateRange}
+                          onSelect={(range) => {
+                            setDateRange(range);
+                            if (range?.from && range?.to) {
+                              setIsDatePickerOpen(false);
+                            }
+                          }}
+                          initialFocus
+                          numberOfMonths={2}
+                          className="bg-white rounded-md border shadow-md"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="asanaUrl">Asana URL</Label>
+                <Input
+                  id="asanaUrl"
+                  value={formData.asanaUrl}
+                  onChange={(e) => handleInputChange('asanaUrl', e.target.value)}
+                  placeholder="Enter Asana project URL"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="priority">Priority</Label>
+                <Select value={formData.priority} onValueChange={(value) => handleInputChange('priority', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="status">Status</Label>
+                <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="planned">Planned</SelectItem>
+                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="on-hold">On Hold</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div>
               <Label htmlFor="description">Description</Label>
               <Textarea
@@ -460,74 +568,44 @@ const ProjectForm = ({
                 rows={3}
               />
             </div>
-            
+          </div>
+
+          {/* Hours Tracking */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Hours Tracking</h3>
+
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-4">
-                {/* Date Range Picker */}
-                <div className="space-y-4">
-                  <Label htmlFor="dateRange">Project Dates *</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal h-10",
-                          !dateRange.from && !dateRange.to && "text-muted-foreground"
-                        )}
-                      >
-                        <Calendar className="mr-2 h-4 w-4 shrink-0" />
-                        <span>
-                          {dateRange.from && dateRange.to
-                            ? `${format(dateRange.from, "PPP")} - ${format(dateRange.to, "PPP")}`
-                            : "Pick a date range"}
-                        </span>
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="range"
-                        selected={dateRange}
-                        onSelect={setDateRange}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
+              <div>
+                <Label htmlFor="estimatedHours">Estimated Hours</Label>
+                <Input
+                  id="estimatedHours"
+                  type="number"
+                  min="0"
+                  value={formData.estimatedHours}
+                  onChange={(e) => handleInputChange('estimatedHours', e.target.value)}
+                  placeholder="Enter estimated hours"
+                />
               </div>
               
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="priority">Priority</Label>
-                  <Select value={formData.priority} onValueChange={(value) => handleInputChange('priority', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="status">Status</Label>
-                  <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="planned">Planned</SelectItem>
-                      <SelectItem value="in-progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="on-hold">On Hold</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label htmlFor="pmHours">PM Hours</Label>
+                <Input
+                  id="pmHours"
+                  type="number"
+                  min="0"
+                  value={formData.autoPopulatePM ? 
+                    Math.ceil(formData.estimatedHours * (formData.pmAllocation / 100)) : 
+                    formData.pmHours}
+                  onChange={(e) => handleInputChange('pmHours', e.target.value)}
+                  readOnly={!formData.simpleMode || formData.autoPopulatePM}
+                  className={(!formData.simpleMode || formData.autoPopulatePM) ? "bg-gray-50 cursor-not-allowed" : ""}
+                  placeholder={formData.autoPopulatePM ? 
+                    "Calculated from estimated hours" : 
+                    "Enter PM hours"}
+                />
               </div>
             </div>
 
-            {/* PM Allocation */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="pmAllocation">Project Manager Allocation (%)</Label>
@@ -555,356 +633,155 @@ const ProjectForm = ({
                 </Label>
               </div>
             </div>
-
-            {/* Hours Tracking */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Hours Tracking</h3>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="estimatedHours">Estimated Hours</Label>
-                  <Input
-                    id="estimatedHours"
-                    type="number"
-                    min="0"
-                    value={formData.estimatedHours}
-                    onChange={(e) => handleInputChange('estimatedHours', e.target.value)}
-                    placeholder="Enter estimated hours"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="pmHours">PM Hours</Label>
-                  <Input
-                    id="pmHours"
-                    type="number"
-                    min="0"
-                    value={formData.autoPopulatePM ? 
-                      Math.ceil(formData.estimatedHours * (formData.pmAllocation / 100)) : 
-                      formData.pmHours}
-                    onChange={(e) => handleInputChange('pmHours', e.target.value)}
-                    readOnly={!formData.simpleMode || formData.autoPopulatePM}
-                    className={(!formData.simpleMode || formData.autoPopulatePM) ? "bg-gray-50 cursor-not-allowed" : ""}
-                    placeholder={formData.autoPopulatePM ? 
-                      "Calculated from estimated hours" : 
-                      "Enter PM hours"}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="totalHours">Total Hours (Est. + PM)</Label>
-                  <Input
-                    id="totalHours"
-                    type="number"
-                    min="0"
-                    value={formData.totalHours}
-                    readOnly
-                    className="bg-gray-50 cursor-not-allowed"
-                    placeholder={formData.simpleMode ? 
-                      "Calculated from estimated hours + PM" : 
-                      "Calculated from resource hours + PM"}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="hoursUsed">Hours Used</Label>
-                  <Input
-                    id="hoursUsed"
-                    type="number"
-                    min="0"
-                    value={formData.hoursUsed}
-                    onChange={(e) => handleInputChange('hoursUsed', parseInt(e.target.value) || 0)}
-                    placeholder="Enter hours used"
-                  />
-                </div>
-              </div>
-
-              {/* Progress Display */}
-              <div className="mt-2">
-                <Label>Progress</Label>
-                <div className="flex items-center space-x-2">
-                  <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-purple-600 transition-all duration-300"
-                      style={{ width: `${formData.totalHours > 0 ? (formData.hoursUsed / formData.totalHours) * 100 : 0}%` }}
-                    />
-                  </div>
-                  <span className="text-sm text-gray-600">
-                    {formData.totalHours > 0 ? Math.round((formData.hoursUsed / formData.totalHours) * 100) : 0}%
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Resource Allocation */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Resource Allocation</h3>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="simpleMode"
-                  checked={formData.simpleMode}
-                  onChange={(e) => handleInputChange('simpleMode', e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                />
-                <Label htmlFor="simpleMode" className="text-sm text-gray-700">
-                  Simple Mode
-                </Label>
-              </div>
-            </div>
-            
-            {!formData.simpleMode && (
-              <>
-                <div className="grid grid-cols-2 gap-4">
-                  {resourceTypes.map((resourceType) => (
-                    <div key={resourceType.id} className="space-y-2">
-                      <Label className="text-base">{resourceType.name}</Label>
-                      <div className="flex space-x-2">
-                        <div className="flex-1">
-                          <Input
-                            type="number"
-                            placeholder="Required"
-                            value={formData.resources[resourceType.id]?.required || ''}
-                            onChange={(e) => handleResourceChange(resourceType.id, 'required', e.target.value)}
-                            min="0"
-                          />
-                          <div className="text-xs text-gray-500 mt-1">Required</div>
-                        </div>
-                        <div className="flex-1">
-                          <Input
-                            type="number"
-                            placeholder="Allocated"
-                            value={formData.resources[resourceType.id]?.allocated || ''}
-                            onChange={(e) => handleResourceChange(resourceType.id, 'allocated', e.target.value)}
-                            min="0"
-                          />
-                          <div className="text-xs text-gray-500 mt-1">Allocated</div>
-                        </div>
-                        <div className="flex-1">
-                          <Input
-                            type="number"
-                            placeholder="Hours Required"
-                            value={formData.resources[resourceType.id]?.hours || ''}
-                            onChange={(e) => handleResourceChange(resourceType.id, 'hours', e.target.value)}
-                            min="0"
-                          />
-                          <div className="text-xs text-gray-500 mt-1">Hours</div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* PM Allocation */}
-                <div className="mt-6 space-y-4">
-                  <div>
-                    <Label htmlFor="pmAllocation">PM Allocation (%)</Label>
-                    <Input
-                      id="pmAllocation"
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={formData.pmAllocation}
-                      onChange={(e) => handleInputChange('pmAllocation', parseInt(e.target.value) || 0)}
-                      placeholder="Enter PM allocation percentage"
-                    />
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="autoPopulatePM"
-                      checked={formData.autoPopulatePM}
-                      onChange={(e) => handleInputChange('autoPopulatePM', e.target.checked)}
-                      className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                    />
-                    <Label htmlFor="autoPopulatePM" className="text-sm text-gray-700">
-                      Auto-populate PM hours based on allocation
-                    </Label>
-                  </div>
-                </div>
-              </>
-            )}
           </div>
 
           {/* Milestones */}
-          <div className="space-y-6 mt-8">
-            <div className="flex items-center justify-between mt-8 mb-4">
-              <h3 className="text-lg font-semibold">Milestones / Rocks</h3>
-            </div>
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Milestones</h3>
+            
             {/* Add Milestone Form */}
-            <div className="border rounded-lg p-4 bg-gray-50 mb-4">
-              <div className="flex flex-row flex-wrap gap-4 items-end max-w-full">
-                <div className="flex-1 min-w-[140px] max-w-full">
-                  <Label htmlFor="milestoneName" className="text-base">Milestone Name</Label>
-                  <Input
-                    id="milestoneName"
-                    value={newMilestone.name}
-                    onChange={(e) => setNewMilestone(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Enter milestone name"
-                  />
-                </div>
-                <div className="w-40 min-w-[120px] max-w-full">
-                  <Label htmlFor="milestoneStatus" className="text-base">Status</Label>
-                  <Select value={newMilestone.status} onValueChange={(value) => setNewMilestone(prev => ({ ...prev, status: value }))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="planned">Planned</SelectItem>
-                      <SelectItem value="in-progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="w-40 min-w-[120px] max-w-full">
-                  <Label htmlFor="milestoneDate" className="text-base">Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal h-10",
-                          !newMilestone.date && "text-muted-foreground"
-                        )}
-                      >
-                        <Calendar className="mr-2 h-4 w-4 shrink-0" />
-                        <span>
-                          {newMilestone.date
-                            ? format(new Date(newMilestone.date), "MM/dd/yy")
-                            : "Pick a date"}
-                        </span>
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+            <div className="flex items-end space-x-4">
+              <div className="flex-1">
+                <Label htmlFor="milestoneName" className="text-base">Name</Label>
+                <Input
+                  id="milestoneName"
+                  value={newMilestone.name}
+                  onChange={(e) => setNewMilestone(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter milestone name"
+                />
+              </div>
+              
+              <div className="w-40 min-w-[120px] max-w-full">
+                <Label htmlFor="milestoneDate" className="text-base">Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal h-10",
+                        !newMilestone.date && "text-muted-foreground"
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4 shrink-0" />
+                      <span>
+                        {newMilestone.date
+                          ? format(new Date(newMilestone.date), "MM/dd/yy")
+                          : "Pick a date"}
+                      </span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start" side="bottom" sideOffset={4} forceMount>
+                    <div className="bg-white rounded-md border shadow-md">
                       <CalendarComponent
                         mode="single"
                         selected={newMilestone.date ? new Date(newMilestone.date) : undefined}
                         onSelect={date => setNewMilestone(prev => ({ ...prev, date: date ? date.toISOString().split('T')[0] : '' }))}
                         initialFocus
                       />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <Button onClick={addMilestone} size="icon" className="rounded-full bg-green-600 hover:bg-green-700 text-white w-10 h-10 flex items-center justify-center" aria-label="Add Milestone">
-                  <Plus className="h-5 w-5" />
-                </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
+              <Button onClick={addMilestone} size="icon" className="rounded-full bg-green-600 hover:bg-green-700 text-white w-10 h-10 flex items-center justify-center" aria-label="Add Milestone">
+                <Plus className="h-5 w-5" />
+              </Button>
             </div>
             
             {/* Milestone List */}
-            {formData.milestones.length > 0 && (
-              <div className="space-y-2">
-                {formData.milestones.map((milestone) => (
-                  <div key={milestone.id} className="flex items-center justify-between p-3 border rounded-lg gap-4">
-                    {editingMilestoneId === milestone.id ? (
-                      <>
-                        <div className="flex flex-row flex-wrap gap-2 items-end w-full">
-                          <Input
-                            className="flex-1 min-w-[120px]"
-                            value={editingMilestone.name}
-                            onChange={e => setEditingMilestone(prev => ({ ...prev, name: e.target.value }))}
-                            placeholder="Milestone name"
-                          />
-                          <Select value={editingMilestone.status} onValueChange={value => setEditingMilestone(prev => ({ ...prev, status: value }))}>
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="planned">Planned</SelectItem>
-                              <SelectItem value="in-progress">In Progress</SelectItem>
-                              <SelectItem value="completed">Completed</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-32 justify-start text-left font-normal h-10",
-                                  !editingMilestone.date && "text-muted-foreground"
-                                )}
-                              >
-                                <Calendar className="mr-2 h-4 w-4 shrink-0" />
-                                <span>
-                                  {editingMilestone.date
-                                    ? format(new Date(editingMilestone.date), "MM/dd/yy")
-                                    : "Pick a date"}
-                                </span>
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+            <div className="space-y-2">
+              {formData.milestones.map((milestone) => (
+                <div key={milestone.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  {editingMilestoneId === milestone.id ? (
+                    <>
+                      <div className="flex items-center space-x-4 flex-1">
+                        <Input
+                          value={editingMilestone.name}
+                          onChange={(e) => setEditingMilestone(prev => ({ ...prev, name: e.target.value }))}
+                          className="flex-1"
+                        />
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-32 justify-start text-left font-normal h-10",
+                                !editingMilestone.date && "text-muted-foreground"
+                              )}
+                            >
+                              <Calendar className="mr-2 h-4 w-4 shrink-0" />
+                              <span>
+                                {editingMilestone.date
+                                  ? format(new Date(editingMilestone.date), "MM/dd/yy")
+                                  : "Pick a date"}
+                              </span>
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start" side="bottom" sideOffset={4} forceMount>
+                            <div className="bg-white rounded-md border shadow-md">
                               <CalendarComponent
                                 mode="single"
                                 selected={editingMilestone.date ? new Date(editingMilestone.date) : undefined}
                                 onSelect={date => setEditingMilestone(prev => ({ ...prev, date: date ? date.toISOString().split('T')[0] : '' }))}
                                 initialFocus
                               />
-                            </PopoverContent>
-                          </Popover>
-                          <Button onClick={() => saveEditMilestone(milestone.id)} size="icon" className="rounded-full bg-green-600 hover:bg-green-700 text-white w-8 h-8 flex items-center justify-center ml-2" aria-label="Save Milestone">
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button onClick={cancelEditMilestone} size="icon" className="rounded-full bg-gray-300 hover:bg-gray-400 text-gray-700 w-8 h-8 flex items-center justify-center ml-2" aria-label="Cancel Edit">
-                            <CloseIcon className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex items-center space-x-4 flex-1">
-                          <Calendar className="h-4 w-4 text-gray-500" />
-                          <div>
-                            <div className="font-medium">{milestone.name}</div>
-                            <div className="text-sm text-gray-500">
-                              {milestone.date ? format(new Date(milestone.date), "MM/dd/yy") : ''}
                             </div>
+                          </PopoverContent>
+                        </Popover>
+                        <Button onClick={() => saveEditMilestone(milestone.id)} size="icon" className="rounded-full bg-green-600 hover:bg-green-700 text-white w-8 h-8 flex items-center justify-center ml-2" aria-label="Save Milestone">
+                          <Check className="h-4 w-4" />
+                        </Button>
+                        <Button onClick={cancelEditMilestone} size="icon" className="rounded-full bg-gray-300 hover:bg-gray-400 text-gray-700 w-8 h-8 flex items-center justify-center ml-2" aria-label="Cancel Edit">
+                          <CloseIcon className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center space-x-4 flex-1">
+                        <Calendar className="h-4 w-4 text-gray-500" />
+                        <div>
+                          <div className="font-medium">{milestone.name}</div>
+                          <div className="text-sm text-gray-500">
+                            {milestone.date ? format(new Date(milestone.date), "MM/dd/yy") : ''}
                           </div>
-                          <Badge variant={milestone.status === 'completed' ? 'default' : 'secondary'}>
-                            {milestone.status}
-                          </Badge>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button onClick={() => startEditMilestone(milestone)} size="icon" className="rounded-full bg-blue-600 hover:bg-blue-700 text-white w-8 h-8 flex items-center justify-center ml-2" aria-label="Edit Milestone">
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            onClick={() => removeMilestone(milestone.id)}
-                            size="icon"
-                            variant="destructive"
-                            className="rounded-full bg-red-600 hover:bg-red-700 text-white w-8 h-8 flex items-center justify-center ml-2"
-                            aria-label="Remove Milestone"
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+                        <Badge variant={milestone.status === 'completed' ? 'default' : 'secondary'}>
+                          {milestone.status}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button onClick={() => startEditMilestone(milestone)} size="icon" variant="ghost" className="h-8 w-8">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button onClick={() => removeMilestone(milestone.id)} size="icon" variant="ghost" className="h-8 w-8">
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        <DialogFooter className="flex flex-col items-center gap-2 mt-4 px-0 border-t pt-4">
-          <div className="flex flex-col sm:flex-row gap-2 w-full justify-center items-center">
-            <Button onClick={handleSave} className="bg-purple-600 hover:bg-purple-700 min-w-[160px]">
-              {editingProject ? 'Update Project' : 'Add Project'}
+        <DialogFooter className="flex justify-between">
+          {editingProject && (
+            <Button
+              variant="destructive"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="mr-auto"
+            >
+              Delete Project
             </Button>
-            {editingProject && (
-              <Button 
-                variant="destructive" 
-                className="min-w-[160px]"
-                onClick={() => setShowDeleteConfirm(true)}
-              >
-                Delete Project
-              </Button>
-            )}
+          )}
+          <div className="flex space-x-2">
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave} className="bg-purple-600 hover:bg-purple-700">
+              {editingProject ? 'Save Changes' : 'Add Project'}
+            </Button>
           </div>
         </DialogFooter>
 

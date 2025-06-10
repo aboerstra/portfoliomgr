@@ -351,376 +351,416 @@ const GanttChart = ({ projects, valueStreams, selectedValueStream, onAddProject,
     setDragOverProjectId(null);
   };
 
+  const toggleAllValueStreams = () => {
+    if (expandedStreams.size === valueStreams.length) {
+      setExpandedStreams(new Set());
+    } else {
+      valueStreams.forEach(stream => setExpandedStreams(prev => {
+        const next = new Set(prev);
+        next.add(stream.id);
+        return next;
+      }));
+    }
+  };
+
   return (
     <div className="flex-1 bg-white">
-      <Card className="h-full">
-        <CardHeader className="pb-4">
-          <div className="flex justify-between items-start">
-            <div className="space-y-2 flex items-center">
-              <CardTitle className="flex items-center space-x-2">
-                <Calendar className="h-5 w-5" />
-                <span>Portfolio Timeline</span>
-                <Select value={String(currentDate.getMonth())} onValueChange={handleMonthChange}>
-                  <SelectTrigger className="w-[120px] ml-2">
-                    <SelectValue>{monthOptions[currentDate.getMonth()]}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {monthOptions.map((month, idx) => (
-                      <SelectItem key={month} value={String(idx)}>{month}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {selectedValueStream && (
-                  <Badge variant="secondary">
-                    {valueStreams.find(s => s.id === selectedValueStream)?.name}
-                  </Badge>
-                )}
-              </CardTitle>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              {/* Time Range Controls */}
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handlePrevious}
-                    className="h-8 w-8 p-0"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  
-                  <div className="text-sm font-medium">
-                    {timeRange === 'quarter' 
-                      ? `Q${Math.floor(currentDate.getMonth() / 3) + 1} ${currentDate.getFullYear()}`
-                      : currentDate.getFullYear()
-                    }
-                  </div>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleNext}
-                    className="h-8 w-8 p-0"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <label className="text-sm text-gray-600">View:</label>
-                  <Select value={timeRange} onValueChange={handleTimeRangeChange}>
-                    <SelectTrigger className="w-[100px] h-8">
-                      <SelectValue />
+      <Card className="h-[calc(100vh-200px)] flex flex-col">
+        {/* Fixed Headers */}
+        <div className="flex-none">
+          <CardHeader className="pb-4">
+            <div className="flex justify-between items-start">
+              <div className="space-y-2 flex items-center">
+                <CardTitle className="flex items-center space-x-2">
+                  <Calendar className="h-5 w-5" />
+                  <span>Portfolio Timeline</span>
+                  <Select value={String(currentDate.getMonth())} onValueChange={handleMonthChange}>
+                    <SelectTrigger className="w-[120px] ml-2">
+                      <SelectValue>{monthOptions[currentDate.getMonth()]}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="quarter">Quarter</SelectItem>
-                      <SelectItem value="year">Year</SelectItem>
+                      {monthOptions.map((month, idx) => (
+                        <SelectItem key={month} value={String(idx)}>{month}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
-                </div>
+                  {selectedValueStream && (
+                    <Badge variant="secondary">
+                      {valueStreams.find(s => s.id === selectedValueStream)?.name}
+                    </Badge>
+                  )}
+                </CardTitle>
               </div>
 
-              <Button onClick={() => onAddProject()} size="sm" className="bg-purple-600 hover:bg-purple-700">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Project
-              </Button>
-              <Badge variant="outline">{projects.length} Projects</Badge>
-            </div>
-          </div>
-        </CardHeader>
-        
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            {/* Timeline Container with Today Line */}
-            <div className="relative">
-              {/* Timeline Header */}
-              <div className="sticky top-0 bg-white border-b border-gray-200 z-10">
-                <div className="flex min-w-[1400px]">
-                  {/* Project Names Column */}
-                  <div className="w-96 p-4 border-r border-gray-200 bg-gray-50">
-                    <div className="font-medium text-sm text-gray-700">Value Streams & Projects</div>
+              <div className="flex items-center space-x-4">
+                {/* Time Range Controls */}
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handlePrevious}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    
+                    <div className="text-sm font-medium">
+                      {timeRange === 'quarter' 
+                        ? `Q${Math.floor(currentDate.getMonth() / 3) + 1} ${currentDate.getFullYear()}`
+                        : currentDate.getFullYear()
+                      }
+                    </div>
+                    
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleNext}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
                   </div>
-                  {/* Timeline Header */}
-                  <div className="flex-1 relative">
-                    <div className="flex h-16 border-b border-gray-100">
-                      {timelineData.months.map((month, index) => (
-                        <div 
-                          key={index}
-                          className="flex-1 border-r border-gray-100 p-2 text-center"
-                          style={{ minWidth: '100px' }}
-                        >
-                          <div className="text-xs font-medium text-gray-600">
-                            {month.label}
-                          </div>
-                        </div>
-                      ))}
+
+                  <div className="flex items-center space-x-2">
+                    <label className="text-sm text-gray-600">View:</label>
+                    <Select value={timeRange} onValueChange={handleTimeRangeChange}>
+                      <SelectTrigger className="w-[100px] h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="quarter">Quarter</SelectItem>
+                        <SelectItem value="year">Year</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleAllValueStreams}
+                  className="h-8"
+                >
+                  {expandedStreams.size === valueStreams.length ? 'Collapse All' : 'Expand All'}
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+
+          {/* Timeline Header */}
+          <div className="flex border-b border-gray-200">
+            <div className="w-96 p-4 border-r border-gray-200 bg-gray-50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={toggleAllValueStreams}
+                    className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                  >
+                    {expandedStreams.size === valueStreams.length ? (
+                      <ChevronDown className="h-4 w-4 text-gray-500" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 text-gray-500" />
+                    )}
+                  </button>
+                  <span className="font-medium">Value Streams & Projects</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onAddProject(selectedValueStream)}
+                  className="h-8 w-8 p-0"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="flex-1 relative bg-gray-50">
+              {/* Month Markers */}
+              <div className="flex h-full">
+                {timelineData.months.map((month, index) => (
+                  <div
+                    key={month.label}
+                    className="flex-1 border-r border-gray-200 last:border-r-0"
+                    style={{ minWidth: '100px' }}
+                  >
+                    <div className="p-2 text-center text-sm font-medium">
+                      {month.label}
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
-              {/* Value Stream Groups */}
-              <div className="min-w-[1400px]">
-                {Object.values(projectsByValueStream).map((valueStream) => {
-                  const isExpanded = expandedStreams.has(valueStream.id);
-                  const projectCount = valueStream.projects.length;
-                  const rowHeight = isExpanded ? Math.max(1, projectCount) * barHeight + 40 : 0;
-                  
-                  return (
-                    <div
-                      key={valueStream.id}
-                      className={`border-b border-gray-200 ${dragOverValueStreamId === valueStream.id ? 'bg-purple-50' : ''}`}
-                      onDragOver={e => handleValueStreamDragOver(e, valueStream.id)}
-                      onDrop={e => handleValueStreamDrop(e, valueStream.id)}
-                    >
-                      {/* Value Stream Header */}
-                      <div className="flex bg-gray-50 border-b border-gray-100">
-                        <div className="w-96 p-4 border-r border-gray-200">
-                          <div className="flex items-center space-x-3">
-                            <button
-                              onClick={() => toggleValueStream(valueStream.id)}
-                              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                            >
-                              {isExpanded ? (
-                                <ChevronDown className="h-4 w-4 text-gray-500" />
-                              ) : (
-                                <ChevronRight className="h-4 w-4 text-gray-500" />
-                              )}
-                            </button>
-                            <div 
-                              className="w-4 h-4 rounded-full"
-                              style={{ backgroundColor: valueStream.color }}
-                            />
-                            <div>
-                              <div className="font-semibold text-sm text-gray-800">
-                                {valueStream.name}
-                              </div>
-                              <div className="text-xs text-gray-600">
-                                {valueStream.projects.length} projects
-                              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-auto">
+          <div className="relative">
+            {/* Value Stream Groups */}
+            <div className="w-[calc(100%-400px)]">
+              {Object.values(projectsByValueStream).map((valueStream) => {
+                const isExpanded = expandedStreams.has(valueStream.id);
+                const projectCount = valueStream.projects.length;
+                const rowHeight = isExpanded ? Math.max(1, projectCount) * barHeight + 40 : 0;
+                
+                return (
+                  <div
+                    key={valueStream.id}
+                    className={`border-b border-gray-200 ${dragOverValueStreamId === valueStream.id ? 'bg-purple-50' : ''}`}
+                    onDragOver={e => handleValueStreamDragOver(e, valueStream.id)}
+                    onDrop={e => handleValueStreamDrop(e, valueStream.id)}
+                  >
+                    {/* Value Stream Header */}
+                    <div className="flex bg-gray-50 border-b border-gray-100">
+                      <div className="w-96 p-4 border-r border-gray-200">
+                        <div className="flex items-center space-x-3">
+                          <button
+                            onClick={() => toggleValueStream(valueStream.id)}
+                            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                          >
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4 text-gray-500" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-gray-500" />
+                            )}
+                          </button>
+                          <div 
+                            className="w-4 h-4 rounded-full"
+                            style={{ backgroundColor: valueStream.color }}
+                          />
+                          <div>
+                            <div className="font-semibold text-sm text-gray-800">
+                              {valueStream.name}
                             </div>
-                            <Button 
-                              onClick={() => onAddProject(valueStream.id)} 
-                              size="sm" 
-                              variant="ghost"
-                              className="ml-auto h-6 w-6 p-0"
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
+                            <div className="text-xs text-gray-600">
+                              {valueStream.projects.length} projects
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex-1 relative bg-gray-25">
-                          {/* Value Stream Timeline Background */}
+                          <Button 
+                            onClick={() => onAddProject(valueStream.id)} 
+                            size="sm" 
+                            variant="ghost"
+                            className="ml-auto h-6 w-6 p-0"
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
                         </div>
                       </div>
-
-                      {/* Projects within Value Stream */}
-                      <div
-                        className="flex-1 relative p-2 pb-6"
-                        ref={timelineRef}
-                        style={{ height: isExpanded ? rowHeight : 0, transition: 'height 0.2s' }}
-                      >
-                        {isExpanded && (
-                          <div className="flex">
-                            <div className="w-96 border-r border-gray-200 bg-white flex flex-col justify-start" style={{ minHeight: rowHeight }}>
-                              {valueStream.projects.map((project, index) => (
-                                <div key={project.id + '-wrapper'} className="w-full border-b border-gray-100">
-                                  <div
-                                    key={project.id}
-                                    style={{ height: barHeight, marginBottom: 8 }}
-                                    className={`flex flex-col justify-center ${dragOverProjectId === project.id ? 'bg-purple-50' : ''}`}
-                                    draggable={true}
-                                    onDragStart={e => handleReorderDragStart(e, project.id)}
-                                    onDragOver={e => handleReorderDragOver(e, project.id)}
-                                    onDrop={e => handleReorderDrop(e, valueStream.id, project.id)}
-                                    onDragEnd={handleReorderDragEnd}
-                                  >
-                                    <div className="flex items-center justify-between h-full px-2">
-                                      <div className="flex flex-col min-w-0 flex-1 pr-2">
-                                        <div className="flex items-center gap-2">
-                                          <button
-                                            className="p-1 hover:bg-gray-100 rounded-full cursor-grab"
-                                            title="Reorder Project"
-                                            tabIndex={-1}
-                                            style={{ pointerEvents: 'none' }}
+                      <div className="flex-1 relative bg-gray-25">
+                        {/* Value Stream Timeline Background */}
+                      </div>
+                    </div>
+                    
+                    {/* Projects within Value Stream */}
+                    <div
+                      className="flex-1 relative p-2 pb-6"
+                      ref={timelineRef}
+                      style={{ 
+                        height: isExpanded ? rowHeight : 0, 
+                        transition: 'height 0.2s ease-in-out',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      {isExpanded && (
+                        <div className="flex">
+                          <div className="w-96 border-r border-gray-200 bg-white flex flex-col justify-start" style={{ minHeight: rowHeight }}>
+                            {valueStream.projects.map((project, index) => (
+                              <div key={project.id + '-wrapper'} className="w-full border-b border-gray-100">
+                                <div
+                                  key={project.id}
+                                  style={{ height: barHeight, marginBottom: 8 }}
+                                  className={`flex flex-col justify-center ${dragOverProjectId === project.id ? 'bg-purple-50' : ''}`}
+                                  draggable={true}
+                                  onDragStart={e => handleReorderDragStart(e, project.id)}
+                                  onDragOver={e => handleReorderDragOver(e, project.id)}
+                                  onDrop={e => handleReorderDrop(e, valueStream.id, project.id)}
+                                  onDragEnd={handleReorderDragEnd}
+                                >
+                                  <div className="flex items-center justify-between h-full px-2">
+                                    <div className="flex flex-col min-w-0 flex-1 pr-2">
+                                      <div className="flex items-center gap-2">
+                                        <button
+                                          className="p-1 hover:bg-gray-100 rounded-full cursor-grab"
+                                          title="Reorder Project"
+                                          tabIndex={-1}
+                                          style={{ pointerEvents: 'none' }}
+                                        >
+                                          <GripVertical className="w-4 h-4 text-gray-400" />
+                                        </button>
+                                        <span className="font-medium text-sm truncate min-w-0 flex items-center">
+                                          {project.name}
+                                          {statusIcon(project.status)}
+                                        </span>
+                                      </div>
+                                      <div className="flex mt-1 text-xs text-gray-500 truncate">
+                                        <div className="flex-shrink-0 flex flex-col items-start ml-7" style={{ minWidth: '4.5rem' }}>
+                                          <Badge 
+                                            className={`text-xs w-fit 
+                                              ${project.priority === 'high' ? 'bg-red-500 text-white' : ''}
+                                              ${project.priority === 'medium' ? 'bg-yellow-400 text-gray-900' : ''}
+                                              ${project.priority === 'low' ? 'bg-green-500 text-white' : ''}
+                                            `}
                                           >
-                                            <GripVertical className="w-4 h-4 text-gray-400" />
-                                          </button>
-                                          <span className="font-medium text-sm truncate min-w-0 flex items-center">
-                                            {project.name}
-                                            {statusIcon(project.status)}
+                                            {project.priority}
+                                          </Badge>
+                                        </div>
+                                        <div className="flex-1 flex items-center gap-4 ml-2 min-w-0">
+                                          <div className="flex items-center gap-1">
+                                            <Users className="h-4 w-4" />
+                                            <StatusIconWithTooltip
+                                              tooltip={Object.entries(project.resources || {}).map(([type, res]) => {
+                                                console.log('Resource Type ID:', type);
+                                                console.log('Resource Data:', res);
+                                                console.log('Available Resource Types:', resourceTypes);
+                                                console.log('Matching Resource Type:', resourceTypes.find(r => r.id === type));
+                                                const rt = resourceTypes.find(r => r.id === type);
+                                                const rtByName = resourceTypes.find(r => r.name.toLowerCase() === type.toLowerCase());
+                                                const displayName = rt?.name || rtByName?.name || type;
+                                                console.log('Final Display Name:', displayName);
+                                                return `${displayName}: ${res.allocated || 0}/${res.required || 0}`;
+                                              }).join('\n')}
+                                            >
+                                              <span>{
+                                                Number.isFinite(Object.values(project.resources).reduce((sum, resource) => sum + (resource.allocated || 0), 0))
+                                                  ? Object.values(project.resources).reduce((sum, resource) => sum + (resource.allocated || 0), 0)
+                                                  : 0
+                                              } people</span>
+                                            </StatusIconWithTooltip>
+                                          </div>
+                                          <span className="text-gray-400 truncate">
+                                            {new Date(project.startDate).toLocaleDateString(undefined, { month: '2-digit', day: '2-digit' })} - {new Date(project.endDate).toLocaleDateString(undefined, { month: '2-digit', day: '2-digit' })}
                                           </span>
                                         </div>
-                                        <div className="flex mt-1 text-xs text-gray-500 truncate">
-                                          <div className="flex-shrink-0 flex flex-col items-start ml-7" style={{ minWidth: '4.5rem' }}>
-                                            <Badge 
-                                              className={`text-xs w-fit 
-                                                ${project.priority === 'high' ? 'bg-red-500 text-white' : ''}
-                                                ${project.priority === 'medium' ? 'bg-yellow-400 text-gray-900' : ''}
-                                                ${project.priority === 'low' ? 'bg-green-500 text-white' : ''}
-                                              `}
-                                            >
-                                              {project.priority}
-                                            </Badge>
-                                          </div>
-                                          <div className="flex-1 flex items-center gap-4 ml-2 min-w-0">
-                                            <div className="flex items-center gap-1">
-                                              <Users className="h-4 w-4" />
-                                              <StatusIconWithTooltip
-                                                tooltip={Object.entries(project.resources || {}).map(([type, res]) => {
-                                                  console.log('Resource Type ID:', type);
-                                                  console.log('Resource Data:', res);
-                                                  console.log('Available Resource Types:', resourceTypes);
-                                                  console.log('Matching Resource Type:', resourceTypes.find(r => r.id === type));
-                                                  const rt = resourceTypes.find(r => r.id === type);
-                                                  const rtByName = resourceTypes.find(r => r.name.toLowerCase() === type.toLowerCase());
-                                                  const displayName = rt?.name || rtByName?.name || type;
-                                                  console.log('Final Display Name:', displayName);
-                                                  return `${displayName}: ${res.allocated || 0}/${res.required || 0}`;
-                                                }).join('\n')}
-                                              >
-                                                <span>{
-                                                  Number.isFinite(Object.values(project.resources).reduce((sum, resource) => sum + (resource.allocated || 0), 0))
-                                                    ? Object.values(project.resources).reduce((sum, resource) => sum + (resource.allocated || 0), 0)
-                                                    : 0
-                                                } people</span>
-                                              </StatusIconWithTooltip>
-                                            </div>
-                                            <span className="text-gray-400 truncate">
-                                              {new Date(project.startDate).toLocaleDateString(undefined, { month: '2-digit', day: '2-digit' })} - {new Date(project.endDate).toLocaleDateString(undefined, { month: '2-digit', day: '2-digit' })}
-                                            </span>
-                                          </div>
-                                        </div>
                                       </div>
-                                      <div className="flex items-center space-x-1 flex-shrink-0">
+                                    </div>
+                                    <div className="flex items-center space-x-1 flex-shrink-0">
+                                      <button
+                                        className="p-1 hover:bg-gray-100 rounded-full"
+                                        title="Edit Project"
+                                        onClick={() => onAddProject(project.valueStreamId, project)}
+                                      >
+                                        <Pencil className="w-4 h-4 text-gray-500" />
+                                      </button>
+                                      {typeof onDeleteProject === 'function' && (
                                         <button
-                                          className="p-1 hover:bg-gray-100 rounded-full"
-                                          title="Edit Project"
-                                          onClick={() => onAddProject(project.valueStreamId, project)}
+                                          className="p-1 hover:bg-red-100 rounded-full"
+                                          title="Delete Project"
+                                          onClick={() => onDeleteProject(project)}
                                         >
-                                          <Pencil className="w-4 h-4 text-gray-500" />
+                                          <Trash2 className="w-4 h-4 text-red-500" />
                                         </button>
-                                        {typeof onDeleteProject === 'function' && (
-                                          <button
-                                            className="p-1 hover:bg-red-100 rounded-full"
-                                            title="Delete Project"
-                                            onClick={() => onDeleteProject(project)}
-                                          >
-                                            <Trash2 className="w-4 h-4 text-red-500" />
-                                          </button>
-                                        )}
-                                      </div>
+                                      )}
                                     </div>
                                   </div>
                                 </div>
-                              ))}
-                            </div>
-                            <div className="flex-1 relative" style={{ minHeight: rowHeight }}>
-                              {valueStream.projects.map((project, index) => {
-                                const projectTimelineData = getProjectTimelineData(project);
-                                if (!projectTimelineData) return null;
-                                const isDragging = draggingProject?.id === project.id;
-                                const topOffset = index * barHeight;
-                                return (
-                                  <div key={project.id} style={{ position: 'absolute', left: 0, right: 0, top: topOffset, height: barHeight, zIndex: 1 }}>
-                                    <div 
-                                      className={`absolute rounded-md shadow-sm border border-gray-200 flex items-center justify-between px-2 cursor-move hover:shadow-md transition-shadow ${
-                                        isDragging ? 'shadow-lg z-20' : ''
-                                      }`}
-                                      style={{
-                                        top: 12, // Center the bar vertically
-                                        height: 24, // Fixed bar height
-                                        left: `${projectTimelineData.leftPercent}%`,
-                                        width: `${projectTimelineData.widthPercent}%`,
-                                        backgroundColor: valueStream.color,
-                                        opacity: isDragging ? 0.9 : 0.8,
-                                        transform: isDragging ? 'scale(1.02)' : 'scale(1)',
-                                        transition: isDragging ? 'none' : 'all 0.2s ease-in-out'
-                                      }}
-                                      onMouseDown={(e) => handleDragStart(e, project, 'move')}
-                                      onDoubleClick={(e) => handleDoubleClick(e, project)}
-                                    >
-                                      {/* Start Date Handle */}
-                                      {projectTimelineData.isStartVisible && (
-                                        <div 
-                                          className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white hover:bg-opacity-20"
-                                          onMouseDown={(e) => handleDragStart(e, project, 'start')}
-                                        />
-                                      )}
-                                      <div className="text-white text-xs font-medium truncate">
-                                        {project.name}
-                                      </div>
-                                      <div className="ml-auto text-white text-xs font-semibold pr-1">
-                                        {project.totalHours > 0 ? Math.round((project.hoursUsed / project.totalHours) * 100) : 0}%
-                                      </div>
-                                      {/* End Date Handle */}
-                                      {projectTimelineData.isEndVisible && (
-                                        <div
-                                          className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white hover:bg-opacity-20"
-                                          onMouseDown={(e) => handleDragStart(e, project, 'end')}
-                                        />
-                                      )}
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex-1 relative" style={{ minHeight: rowHeight }}>
+                            {valueStream.projects.map((project, index) => {
+                              const projectTimelineData = getProjectTimelineData(project);
+                              if (!projectTimelineData) return null;
+                              const isDragging = draggingProject?.id === project.id;
+                              const topOffset = index * barHeight;
+                              return (
+                                <div key={project.id} style={{ position: 'absolute', left: 0, right: 0, top: topOffset, height: barHeight, zIndex: 1 }}>
+                                  <div 
+                                    className={`absolute rounded-md shadow-sm border border-gray-200 flex items-center justify-between px-2 cursor-move hover:shadow-md transition-shadow ${
+                                      isDragging ? 'shadow-lg z-20' : ''
+                                    }`}
+                                    style={{
+                                      top: 12, // Center the bar vertically
+                                      height: 24, // Fixed bar height
+                                      left: `${projectTimelineData.leftPercent}%`,
+                                      width: `${projectTimelineData.widthPercent}%`,
+                                      backgroundColor: valueStream.color,
+                                      opacity: isDragging ? 0.9 : 0.8,
+                                      transform: isDragging ? 'scale(1.02)' : 'scale(1)',
+                                      transition: isDragging ? 'none' : 'all 0.2s ease-in-out'
+                                    }}
+                                    onMouseDown={(e) => handleDragStart(e, project, 'move')}
+                                    onDoubleClick={(e) => handleDoubleClick(e, project)}
+                                  >
+                                    {/* Start Date Handle */}
+                                    {projectTimelineData.isStartVisible && (
+                                      <div 
+                                        className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white hover:bg-opacity-20"
+                                        onMouseDown={(e) => handleDragStart(e, project, 'start')}
+                                      />
+                                    )}
+                                    <div className="text-white text-xs font-medium truncate">
+                                      {project.name}
                                     </div>
-                                    {/* Milestones */}
-                                    {project.milestones.map((milestone) => {
-                                      const position = getMilestonePosition(milestone.date);
-                                      return (
-                                        <div
-                                          key={milestone.id}
-                                          className="absolute top-6 transform -translate-x-1/2"
-                                          style={{ left: `${position}%` }}
-                                        >
-                                          <div className="relative group">
-                                            <Diamond 
-                                              className={`h-4 w-4 cursor-pointer ${
-                                                milestone.status === 'completed' ? 'text-green-600 fill-green-600' :
-                                                milestone.status === 'in-progress' ? 'text-blue-600 fill-blue-600' :
-                                                'text-gray-400 fill-gray-400'
-                                              }`}
-                                            />
-                                            {/* Milestone Tooltip */}
-                                            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
-                                              {milestone.name}
-                                              <br />
-                                              {new Date(milestone.date).toLocaleDateString()}
-                                            </div>
+                                    <div className="ml-auto text-white text-xs font-semibold pr-1">
+                                      {project.totalHours > 0 ? Math.round((project.hoursUsed / project.totalHours) * 100) : 0}%
+                                    </div>
+                                    {/* End Date Handle */}
+                                    {projectTimelineData.isEndVisible && (
+                                      <div
+                                        className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white hover:bg-opacity-20"
+                                        onMouseDown={(e) => handleDragStart(e, project, 'end')}
+                                      />
+                                    )}
+                                  </div>
+                                  {/* Milestones */}
+                                  {project.milestones.map((milestone) => {
+                                    const position = getMilestonePosition(milestone.date);
+                                    return (
+                                      <div
+                                        key={milestone.id}
+                                        className="absolute top-6 transform -translate-x-1/2"
+                                        style={{ left: `${position}%` }}
+                                      >
+                                        <div className="relative group">
+                                          <Diamond 
+                                            className={`h-4 w-4 cursor-pointer ${
+                                              milestone.status === 'completed' ? 'text-green-600 fill-green-600' :
+                                              milestone.status === 'in-progress' ? 'text-blue-600 fill-blue-600' :
+                                              'text-gray-400 fill-gray-400'
+                                            }`}
+                                          />
+                                          {/* Milestone Tooltip */}
+                                          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
+                                            {milestone.name}
+                                            <br />
+                                            {new Date(milestone.date).toLocaleDateString()}
                                           </div>
                                         </div>
-                                      );
-                                    })}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              );
+                            })}
+                            {/* Today Line - only render if today is within the timeline */}
+                            {(() => {
+                              const today = new Date();
+                              if (today >= timelineData.startDate && today <= timelineData.endDate) {
+                                const todayPosition = getMilestonePosition(today.toISOString().split('T')[0]);
+                                return (
+                                  <div 
+                                    className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10"
+                                    style={{ left: `${todayPosition}%` }}
+                                  >
+                                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-red-500 text-white text-xs px-1 rounded">
+                                      Today
+                                    </div>
                                   </div>
                                 );
-                              })}
-                              {/* Today Line - only render if today is within the timeline */}
-                              {(() => {
-                                const today = new Date();
-                                if (today >= timelineData.startDate && today <= timelineData.endDate) {
-                                  const todayPosition = getMilestonePosition(today.toISOString().split('T')[0]);
-                                  return (
-                                    <div 
-                                      className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10"
-                                      style={{ left: `${todayPosition}%` }}
-                                    >
-                                      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-red-500 text-white text-xs px-1 rounded">
-                                        Today
-                                      </div>
-                                    </div>
-                                  );
-                                }
-                                return null;
-                              })()}
-                            </div>
+                              }
+                              return null;
+                            })()}
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        </CardContent>
+        </div>
       </Card>
     </div>
   );
