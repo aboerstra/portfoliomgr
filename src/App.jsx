@@ -416,25 +416,40 @@ function PortfolioView() {
           ...project,
           id: String(project.id || Math.random().toString(36).substr(2, 9)),
           name: String(project.name || ''),
+          description: String(project.description || ''),
           startDate: project.startDate ? new Date(project.startDate).toISOString() : null,
           endDate: project.endDate ? new Date(project.endDate).toISOString() : null,
           valueStreamId: project.valueStreamId ? String(project.valueStreamId) : null,
           resourceTypeId: project.resourceTypeId ? String(project.resourceTypeId) : null,
           status: String(project.status || 'Not Started'),
           priority: String(project.priority || 'Medium'),
-          description: String(project.description || '')
+          progress: Number(project.progress || 0),
+          resources: project.resources || {},
+          milestones: Array.isArray(project.milestones) ? project.milestones.map(milestone => ({
+            ...milestone,
+            id: String(milestone.id || Math.random().toString(36).substr(2, 9)),
+            name: String(milestone.name || ''),
+            date: milestone.date ? new Date(milestone.date).toISOString() : null,
+            status: String(milestone.status || 'planned')
+          })) : [],
+          asanaUrl: String(project.asanaUrl || '')
         })),
         valueStreams: data.valueStreams.map(vs => ({
           ...vs,
           id: String(vs.id || Math.random().toString(36).substr(2, 9)),
           name: String(vs.name || ''),
-          description: String(vs.description || '')
+          description: String(vs.description || ''),
+          color: String(vs.color || '#3B82F6'),
+          primaryStakeholder: String(vs.primaryStakeholder || ''),
+          scorecardMetrics: String(vs.scorecardMetrics || '')
         })),
         resourceTypes: data.resourceTypes.map(rt => ({
           ...rt,
           id: String(rt.id || Math.random().toString(36).substr(2, 9)),
           name: String(rt.name || ''),
-          description: String(rt.description || '')
+          hourlyRate: Number(rt.hourlyRate || 0),
+          capacity: Number(rt.capacity || 1),
+          color: String(rt.color || '#3B82F6')
         }))
       };
       
