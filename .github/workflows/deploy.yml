@@ -30,4 +30,6 @@ jobs:
           branch: gh-pages
           clean: true
           clean-exclude: |
-            .nojekyll 
+            .nojekyll
+          commit-message: "Deploy to gh-pages [skip ci]"
+          force: true 
