@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://adrianboerstra.github.io/faye-portfolio-manager",
+  "homepage": "https://aboerstra.github.io/portfoliomgr",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
