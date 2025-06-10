@@ -166,28 +166,47 @@ function PortfolioView() {
   // Helper function to save data
   const saveData = (data) => {
     try {
+      console.log('Starting saveData function...');
+      console.log('Data to save:', {
+        projects: data.projects.length,
+        valueStreams: data.valueStreams.length,
+        resourceTypes: data.resourceTypes.length
+      });
+      
       const dataString = JSON.stringify(data);
-      console.log('Attempting to save data to localStorage...');
-      localStorage.setItem('portfolioData', dataString);
-      console.log('Data saved to localStorage');
+      console.log('Data stringified, length:', dataString.length);
       
-      // Also save to sessionStorage as backup
-      console.log('Saving backup to sessionStorage...');
-      sessionStorage.setItem('portfolioData', dataString);
-      console.log('Data saved to sessionStorage');
-      
-      return true;
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      // Try localStorage first
+      console.log('Attempting to save to localStorage...');
       try {
-        console.log('Attempting to save to sessionStorage only...');
-        sessionStorage.setItem('portfolioData', JSON.stringify(data));
-        console.log('Data saved to sessionStorage only');
+        localStorage.setItem('portfolioData', dataString);
+        const verifyData = localStorage.getItem('portfolioData');
+        if (!verifyData) {
+          throw new Error('Data not found after saving to localStorage');
+        }
+        console.log('Successfully saved and verified in localStorage');
         return true;
-      } catch (sessionError) {
-        console.error('Error saving to sessionStorage:', sessionError);
-        return false;
+      } catch (localError) {
+        console.error('localStorage error:', localError);
+        
+        // Try sessionStorage as fallback
+        console.log('Attempting to save to sessionStorage...');
+        try {
+          sessionStorage.setItem('portfolioData', dataString);
+          const verifyData = sessionStorage.getItem('portfolioData');
+          if (!verifyData) {
+            throw new Error('Data not found after saving to sessionStorage');
+          }
+          console.log('Successfully saved and verified in sessionStorage');
+          return true;
+        } catch (sessionError) {
+          console.error('sessionStorage error:', sessionError);
+          throw new Error('Failed to save to both localStorage and sessionStorage');
+        }
       }
+    } catch (error) {
+      console.error('Error in saveData:', error);
+      return false;
     }
   };
 
@@ -411,6 +430,7 @@ function PortfolioView() {
       }
       
       // Clean and normalize the data
+      console.log('Cleaning and normalizing data...');
       const cleanData = {
         projects: data.projects.map(project => ({
           ...project,
@@ -453,7 +473,7 @@ function PortfolioView() {
         }))
       };
       
-      console.log('Data validation passed. Proceeding with import...');
+      console.log('Data cleaned and normalized. Proceeding with save...');
       
       // Save data using the helper function
       const saveSuccess = saveData(cleanData);
