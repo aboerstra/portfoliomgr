@@ -513,19 +513,23 @@ function App() {
               {/* Files Dropdown: combines Scenarios and Actions */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="text-white border-white bg-white/10 hover:bg-white/20">
+                  <Button 
+                    variant="outline" 
+                    className="text-white border-white bg-white/10 hover:bg-white/20"
+                    type="button"
+                  >
                     <File className="h-4 w-4 mr-2" /> Files
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="!bg-white !text-black !border-2 !border-red-500 !p-4 !min-w-[200px]">
-                  <DropdownMenuItem className="!text-black hover:!bg-gray-100">
+                <DropdownMenuContent>
+                  <DropdownMenuItem>
                     <Download className="h-4 w-4 mr-2" /> Export Data
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="!text-black hover:!bg-gray-100">
+                  <DropdownMenuItem>
                     <Upload className="h-4 w-4 mr-2" /> Import Data
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="!text-black hover:!bg-gray-100">
+                  <DropdownMenuItem>
                     <RotateCcw className="h-4 w-4 mr-2" /> Reset Data
                   </DropdownMenuItem>
                 </DropdownMenuContent>
