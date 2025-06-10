@@ -491,12 +491,8 @@ function PortfolioView() {
       // Show success message
       alert(`Successfully imported ${cleanData.projects.length} projects, ${cleanData.valueStreams.length} value streams, and ${cleanData.resourceTypes.length} resource types!`);
       
-      // Small delay to ensure data is saved before reload
-      console.log('Waiting 500ms before reload...');
-      setTimeout(() => {
-        console.log('Reloading page...');
-        window.location.reload();
-      }, 500);
+      // No need to reload the page anymore
+      console.log('Import completed successfully');
     } catch (err) {
       console.error('Import failed:', err);
       setError(err.message);
