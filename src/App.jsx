@@ -666,6 +666,20 @@ function PortfolioView() {
     pdf.save('gantt-chart.pdf');
   };
 
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    console.log('File selected:', file ? {
+      name: file.name,
+      size: file.size,
+      type: file.type
+    } : 'No file');
+    
+    if (file) {
+      console.log('Starting file import...');
+      handleImportData(file);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
@@ -904,7 +918,7 @@ function PortfolioView() {
         ref={null}
         type="file"
         accept=".json"
-        onChange={(e) => handleImportData(e.target.files[0])}
+        onChange={handleFileChange}
         style={{ display: 'none' }}
       />
 
