@@ -1,0 +1,1489 @@
+{
+    "data" : [ {
+      "gid" : "1210391302265438",
+      "actual_time_minutes" : null,
+      "assignee" : null,
+      "assignee_status" : "upcoming",
+      "completed" : false,
+      "completed_at" : null,
+      "created_at" : "2025-05-27T15:38:31.654Z",
+      "custom_fields" : [ {
+        "gid" : "1202639773853589",
+        "enabled" : true,
+        "name" : "Start Date",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1209971237454910",
+          "name" : "Amy Kettelhut",
+          "resource_type" : "user"
+        },
+        "display_value" : null,
+        "resource_subtype" : "date",
+        "resource_type" : "custom_field",
+        "date_value" : null,
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "date"
+      }, {
+        "gid" : "1210476343980223",
+        "enabled" : true,
+        "enum_options" : [ {
+          "gid" : "1210476343980224",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Highest",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980225",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "High",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980226",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Medium",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980227",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Low",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980228",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Lowest",
+          "resource_type" : "enum_option"
+        } ],
+        "enum_value" : null,
+        "name" : "Jira priority",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1203273736108333",
+          "name" : "Laura Dolphin",
+          "resource_type" : "user"
+        },
+        "display_value" : null,
+        "resource_subtype" : "enum",
+        "resource_type" : "custom_field",
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "enum"
+      }, {
+        "gid" : "1210476342409926",
+        "enabled" : true,
+        "enum_options" : [ {
+          "gid" : "1210476342409927",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "New",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409928",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "In Progress",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409929",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Ready for QA",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409930",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Customer Review",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409931",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Canceled",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409932",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Sprint Backlog",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409933",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "To Do",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409934",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Internal Review",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409935",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Backlog",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409936",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Closed",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409937",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Dev Complete",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409938",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Blocked",
+          "resource_type" : "enum_option"
+        } ],
+        "enum_value" : null,
+        "name" : "Jira status",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1203273736108333",
+          "name" : "Laura Dolphin",
+          "resource_type" : "user"
+        },
+        "display_value" : null,
+        "resource_subtype" : "enum",
+        "resource_type" : "custom_field",
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "enum"
+      } ],
+      "due_at" : null,
+      "due_on" : "2025-09-30",
+      "followers" : [ {
+        "gid" : "1203273736108333",
+        "name" : "Laura Dolphin",
+        "resource_type" : "user"
+      } ],
+      "hearted" : false,
+      "hearts" : [ ],
+      "liked" : false,
+      "likes" : [ ],
+      "memberships" : [ {
+        "project" : {
+          "gid" : "1210390640814941",
+          "name" : "2. Credit Underwriting",
+          "resource_type" : "project"
+        },
+        "section" : {
+          "gid" : "1210390640814942",
+          "name" : "Untitled section",
+          "resource_type" : "section"
+        }
+      } ],
+      "modified_at" : "2025-05-27T15:38:42.655Z",
+      "name" : "Automated Approval Processes",
+      "notes" : "",
+      "num_hearts" : 0,
+      "num_likes" : 0,
+      "parent" : null,
+      "permalink_url" : "https://app.asana.com/1/1136653049084869/project/1210390640814941/task/1210391302265438",
+      "projects" : [ {
+        "gid" : "1210390640814941",
+        "name" : "2. Credit Underwriting",
+        "resource_type" : "project"
+      } ],
+      "resource_type" : "task",
+      "start_at" : null,
+      "start_on" : null,
+      "subtasks" : [ ],
+      "tags" : [ ],
+      "resource_subtype" : "milestone",
+      "workspace" : {
+        "gid" : "1136653049084869",
+        "name" : "Faye",
+        "resource_type" : "workspace"
+      }
+    }, {
+      "gid" : "1210391302265436",
+      "actual_time_minutes" : null,
+      "assignee" : null,
+      "assignee_status" : "upcoming",
+      "completed" : false,
+      "completed_at" : null,
+      "created_at" : "2025-05-27T15:38:12.552Z",
+      "custom_fields" : [ {
+        "gid" : "1202639773853589",
+        "enabled" : true,
+        "name" : "Start Date",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1209971237454910",
+          "name" : "Amy Kettelhut",
+          "resource_type" : "user"
+        },
+        "display_value" : null,
+        "resource_subtype" : "date",
+        "resource_type" : "custom_field",
+        "date_value" : null,
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "date"
+      }, {
+        "gid" : "1210476343980223",
+        "enabled" : true,
+        "enum_options" : [ {
+          "gid" : "1210476343980224",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Highest",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980225",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "High",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980226",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Medium",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980227",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Low",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980228",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Lowest",
+          "resource_type" : "enum_option"
+        } ],
+        "enum_value" : null,
+        "name" : "Jira priority",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1203273736108333",
+          "name" : "Laura Dolphin",
+          "resource_type" : "user"
+        },
+        "display_value" : null,
+        "resource_subtype" : "enum",
+        "resource_type" : "custom_field",
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "enum"
+      }, {
+        "gid" : "1210476342409926",
+        "enabled" : true,
+        "enum_options" : [ {
+          "gid" : "1210476342409927",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "New",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409928",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "In Progress",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409929",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Ready for QA",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409930",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Customer Review",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409931",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Canceled",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409932",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Sprint Backlog",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409933",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "To Do",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409934",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Internal Review",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409935",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Backlog",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409936",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Closed",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409937",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Dev Complete",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409938",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Blocked",
+          "resource_type" : "enum_option"
+        } ],
+        "enum_value" : null,
+        "name" : "Jira status",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1203273736108333",
+          "name" : "Laura Dolphin",
+          "resource_type" : "user"
+        },
+        "display_value" : null,
+        "resource_subtype" : "enum",
+        "resource_type" : "custom_field",
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "enum"
+      } ],
+      "due_at" : null,
+      "due_on" : "2025-08-31",
+      "followers" : [ {
+        "gid" : "1203273736108333",
+        "name" : "Laura Dolphin",
+        "resource_type" : "user"
+      } ],
+      "hearted" : false,
+      "hearts" : [ ],
+      "liked" : false,
+      "likes" : [ ],
+      "memberships" : [ {
+        "project" : {
+          "gid" : "1210390640814941",
+          "name" : "2. Credit Underwriting",
+          "resource_type" : "project"
+        },
+        "section" : {
+          "gid" : "1210390640814942",
+          "name" : "Untitled section",
+          "resource_type" : "section"
+        }
+      } ],
+      "modified_at" : "2025-05-27T15:38:24.700Z",
+      "name" : "Scoring Enhancements (Industries)",
+      "notes" : "",
+      "num_hearts" : 0,
+      "num_likes" : 0,
+      "parent" : null,
+      "permalink_url" : "https://app.asana.com/1/1136653049084869/project/1210390640814941/task/1210391302265436",
+      "projects" : [ {
+        "gid" : "1210390640814941",
+        "name" : "2. Credit Underwriting",
+        "resource_type" : "project"
+      } ],
+      "resource_type" : "task",
+      "start_at" : null,
+      "start_on" : null,
+      "subtasks" : [ ],
+      "tags" : [ ],
+      "resource_subtype" : "milestone",
+      "workspace" : {
+        "gid" : "1136653049084869",
+        "name" : "Faye",
+        "resource_type" : "workspace"
+      }
+    }, {
+      "gid" : "1210391302265434",
+      "actual_time_minutes" : null,
+      "assignee" : null,
+      "assignee_status" : "upcoming",
+      "completed" : false,
+      "completed_at" : null,
+      "created_at" : "2025-05-27T15:37:48.090Z",
+      "custom_fields" : [ {
+        "gid" : "1202639773853589",
+        "enabled" : true,
+        "name" : "Start Date",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1209971237454910",
+          "name" : "Amy Kettelhut",
+          "resource_type" : "user"
+        },
+        "display_value" : null,
+        "resource_subtype" : "date",
+        "resource_type" : "custom_field",
+        "date_value" : null,
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "date"
+      }, {
+        "gid" : "1210476343980223",
+        "enabled" : true,
+        "enum_options" : [ {
+          "gid" : "1210476343980224",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Highest",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980225",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "High",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980226",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Medium",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980227",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Low",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980228",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Lowest",
+          "resource_type" : "enum_option"
+        } ],
+        "enum_value" : null,
+        "name" : "Jira priority",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1203273736108333",
+          "name" : "Laura Dolphin",
+          "resource_type" : "user"
+        },
+        "display_value" : null,
+        "resource_subtype" : "enum",
+        "resource_type" : "custom_field",
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "enum"
+      }, {
+        "gid" : "1210476342409926",
+        "enabled" : true,
+        "enum_options" : [ {
+          "gid" : "1210476342409927",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "New",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409928",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "In Progress",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409929",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Ready for QA",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409930",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Customer Review",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409931",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Canceled",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409932",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Sprint Backlog",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409933",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "To Do",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409934",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Internal Review",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409935",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Backlog",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409936",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Closed",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409937",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Dev Complete",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409938",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Blocked",
+          "resource_type" : "enum_option"
+        } ],
+        "enum_value" : null,
+        "name" : "Jira status",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1203273736108333",
+          "name" : "Laura Dolphin",
+          "resource_type" : "user"
+        },
+        "display_value" : null,
+        "resource_subtype" : "enum",
+        "resource_type" : "custom_field",
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "enum"
+      } ],
+      "due_at" : null,
+      "due_on" : "2025-10-31",
+      "followers" : [ {
+        "gid" : "1203273736108333",
+        "name" : "Laura Dolphin",
+        "resource_type" : "user"
+      }, {
+        "gid" : "1202027481390034",
+        "name" : "Adrian Boerstra",
+        "resource_type" : "user"
+      } ],
+      "hearted" : false,
+      "hearts" : [ ],
+      "liked" : false,
+      "likes" : [ ],
+      "memberships" : [ {
+        "project" : {
+          "gid" : "1210390640814941",
+          "name" : "2. Credit Underwriting",
+          "resource_type" : "project"
+        },
+        "section" : {
+          "gid" : "1210390640814942",
+          "name" : "Untitled section",
+          "resource_type" : "section"
+        }
+      } ],
+      "modified_at" : "2025-05-27T15:52:04.387Z",
+      "name" : "Ownership & Time Tracking",
+      "notes" : "What are checkpoints that we're capturing\nWhat are the metrics that we are measuring?\nWhat reports/dashboards will this be need for?\nWhat flows will this trigger?\nWhat notifications will need to happen?",
+      "num_hearts" : 0,
+      "num_likes" : 0,
+      "parent" : null,
+      "permalink_url" : "https://app.asana.com/1/1136653049084869/project/1210390640814941/task/1210391302265434",
+      "projects" : [ {
+        "gid" : "1210390640814941",
+        "name" : "2. Credit Underwriting",
+        "resource_type" : "project"
+      } ],
+      "resource_type" : "task",
+      "start_at" : null,
+      "start_on" : null,
+      "subtasks" : [ ],
+      "tags" : [ ],
+      "resource_subtype" : "milestone",
+      "workspace" : {
+        "gid" : "1136653049084869",
+        "name" : "Faye",
+        "resource_type" : "workspace"
+      }
+    }, {
+      "gid" : "1210390931454636",
+      "actual_time_minutes" : null,
+      "assignee" : null,
+      "assignee_status" : "upcoming",
+      "completed" : false,
+      "completed_at" : null,
+      "created_at" : "2025-05-27T15:13:38.753Z",
+      "custom_fields" : [ {
+        "gid" : "1202639773853589",
+        "enabled" : true,
+        "name" : "Start Date",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1209971237454910",
+          "name" : "Amy Kettelhut",
+          "resource_type" : "user"
+        },
+        "display_value" : "2025-07-01T00:00:00.000Z",
+        "resource_subtype" : "date",
+        "resource_type" : "custom_field",
+        "date_value" : {
+          "date" : "2025-07-01",
+          "date_time" : null
+        },
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "date"
+      }, {
+        "gid" : "1210476343980223",
+        "enabled" : true,
+        "enum_options" : [ {
+          "gid" : "1210476343980224",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Highest",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980225",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "High",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980226",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Medium",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980227",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Low",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980228",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Lowest",
+          "resource_type" : "enum_option"
+        } ],
+        "enum_value" : null,
+        "name" : "Jira priority",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1203273736108333",
+          "name" : "Laura Dolphin",
+          "resource_type" : "user"
+        },
+        "display_value" : null,
+        "resource_subtype" : "enum",
+        "resource_type" : "custom_field",
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "enum"
+      }, {
+        "gid" : "1210476342409926",
+        "enabled" : true,
+        "enum_options" : [ {
+          "gid" : "1210476342409927",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "New",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409928",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "In Progress",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409929",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Ready for QA",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409930",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Customer Review",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409931",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Canceled",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409932",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Sprint Backlog",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409933",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "To Do",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409934",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Internal Review",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409935",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Backlog",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409936",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Closed",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409937",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Dev Complete",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409938",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Blocked",
+          "resource_type" : "enum_option"
+        } ],
+        "enum_value" : null,
+        "name" : "Jira status",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1203273736108333",
+          "name" : "Laura Dolphin",
+          "resource_type" : "user"
+        },
+        "display_value" : null,
+        "resource_subtype" : "enum",
+        "resource_type" : "custom_field",
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "enum"
+      } ],
+      "due_at" : null,
+      "due_on" : "2025-07-31",
+      "followers" : [ {
+        "gid" : "1203273736108333",
+        "name" : "Laura Dolphin",
+        "resource_type" : "user"
+      } ],
+      "hearted" : false,
+      "hearts" : [ ],
+      "liked" : false,
+      "likes" : [ ],
+      "memberships" : [ {
+        "project" : {
+          "gid" : "1210390640814941",
+          "name" : "2. Credit Underwriting",
+          "resource_type" : "project"
+        },
+        "section" : {
+          "gid" : "1210390640814942",
+          "name" : "Untitled section",
+          "resource_type" : "section"
+        }
+      } ],
+      "modified_at" : "2025-05-27T15:21:09.621Z",
+      "name" : "Ownership & Time Tracking",
+      "notes" : "",
+      "num_hearts" : 0,
+      "num_likes" : 0,
+      "parent" : null,
+      "permalink_url" : "https://app.asana.com/1/1136653049084869/project/1210390640814941/task/1210390931454636",
+      "projects" : [ {
+        "gid" : "1210390640814941",
+        "name" : "2. Credit Underwriting",
+        "resource_type" : "project"
+      } ],
+      "resource_type" : "task",
+      "start_at" : null,
+      "start_on" : "2025-07-01",
+      "subtasks" : [ ],
+      "tags" : [ ],
+      "resource_subtype" : "default_task",
+      "workspace" : {
+        "gid" : "1136653049084869",
+        "name" : "Faye",
+        "resource_type" : "workspace"
+      }
+    }, {
+      "gid" : "1210390931454638",
+      "actual_time_minutes" : null,
+      "assignee" : null,
+      "assignee_status" : "upcoming",
+      "completed" : false,
+      "completed_at" : null,
+      "created_at" : "2025-05-27T15:13:49.222Z",
+      "custom_fields" : [ {
+        "gid" : "1202639773853589",
+        "enabled" : true,
+        "name" : "Start Date",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1209971237454910",
+          "name" : "Amy Kettelhut",
+          "resource_type" : "user"
+        },
+        "display_value" : "2025-06-02T00:00:00.000Z",
+        "resource_subtype" : "date",
+        "resource_type" : "custom_field",
+        "date_value" : {
+          "date" : "2025-06-02",
+          "date_time" : null
+        },
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "date"
+      }, {
+        "gid" : "1210476343980223",
+        "enabled" : true,
+        "enum_options" : [ {
+          "gid" : "1210476343980224",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Highest",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980225",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "High",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980226",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Medium",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980227",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Low",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980228",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Lowest",
+          "resource_type" : "enum_option"
+        } ],
+        "enum_value" : null,
+        "name" : "Jira priority",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1203273736108333",
+          "name" : "Laura Dolphin",
+          "resource_type" : "user"
+        },
+        "display_value" : null,
+        "resource_subtype" : "enum",
+        "resource_type" : "custom_field",
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "enum"
+      }, {
+        "gid" : "1210476342409926",
+        "enabled" : true,
+        "enum_options" : [ {
+          "gid" : "1210476342409927",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "New",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409928",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "In Progress",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409929",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Ready for QA",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409930",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Customer Review",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409931",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Canceled",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409932",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Sprint Backlog",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409933",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "To Do",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409934",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Internal Review",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409935",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Backlog",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409936",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Closed",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409937",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Dev Complete",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409938",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Blocked",
+          "resource_type" : "enum_option"
+        } ],
+        "enum_value" : null,
+        "name" : "Jira status",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1203273736108333",
+          "name" : "Laura Dolphin",
+          "resource_type" : "user"
+        },
+        "display_value" : null,
+        "resource_subtype" : "enum",
+        "resource_type" : "custom_field",
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "enum"
+      } ],
+      "due_at" : null,
+      "due_on" : "2025-07-31",
+      "followers" : [ {
+        "gid" : "1203273736108333",
+        "name" : "Laura Dolphin",
+        "resource_type" : "user"
+      } ],
+      "hearted" : false,
+      "hearts" : [ ],
+      "liked" : false,
+      "likes" : [ ],
+      "memberships" : [ {
+        "project" : {
+          "gid" : "1210390640814941",
+          "name" : "2. Credit Underwriting",
+          "resource_type" : "project"
+        },
+        "section" : {
+          "gid" : "1210390640814942",
+          "name" : "Untitled section",
+          "resource_type" : "section"
+        }
+      } ],
+      "modified_at" : "2025-05-27T15:21:18.962Z",
+      "name" : "Scoring Enhancements (Industries)",
+      "notes" : "",
+      "num_hearts" : 0,
+      "num_likes" : 0,
+      "parent" : null,
+      "permalink_url" : "https://app.asana.com/1/1136653049084869/project/1210390640814941/task/1210390931454638",
+      "projects" : [ {
+        "gid" : "1210390640814941",
+        "name" : "2. Credit Underwriting",
+        "resource_type" : "project"
+      } ],
+      "resource_type" : "task",
+      "start_at" : null,
+      "start_on" : "2025-06-01",
+      "subtasks" : [ ],
+      "tags" : [ ],
+      "resource_subtype" : "default_task",
+      "workspace" : {
+        "gid" : "1136653049084869",
+        "name" : "Faye",
+        "resource_type" : "workspace"
+      }
+    }, {
+      "gid" : "1210390931454640",
+      "actual_time_minutes" : null,
+      "assignee" : null,
+      "assignee_status" : "upcoming",
+      "completed" : false,
+      "completed_at" : null,
+      "created_at" : "2025-05-27T15:13:57.356Z",
+      "custom_fields" : [ {
+        "gid" : "1202639773853589",
+        "enabled" : true,
+        "name" : "Start Date",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1209971237454910",
+          "name" : "Amy Kettelhut",
+          "resource_type" : "user"
+        },
+        "display_value" : "2025-09-01T00:00:00.000Z",
+        "resource_subtype" : "date",
+        "resource_type" : "custom_field",
+        "date_value" : {
+          "date" : "2025-09-01",
+          "date_time" : null
+        },
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "date"
+      }, {
+        "gid" : "1210476343980223",
+        "enabled" : true,
+        "enum_options" : [ {
+          "gid" : "1210476343980224",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Highest",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980225",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "High",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980226",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Medium",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980227",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Low",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980228",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Lowest",
+          "resource_type" : "enum_option"
+        } ],
+        "enum_value" : null,
+        "name" : "Jira priority",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1203273736108333",
+          "name" : "Laura Dolphin",
+          "resource_type" : "user"
+        },
+        "display_value" : null,
+        "resource_subtype" : "enum",
+        "resource_type" : "custom_field",
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "enum"
+      }, {
+        "gid" : "1210476342409926",
+        "enabled" : true,
+        "enum_options" : [ {
+          "gid" : "1210476342409927",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "New",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409928",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "In Progress",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409929",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Ready for QA",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409930",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Customer Review",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409931",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Canceled",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409932",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Sprint Backlog",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409933",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "To Do",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409934",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Internal Review",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409935",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Backlog",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409936",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Closed",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409937",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Dev Complete",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409938",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Blocked",
+          "resource_type" : "enum_option"
+        } ],
+        "enum_value" : null,
+        "name" : "Jira status",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1203273736108333",
+          "name" : "Laura Dolphin",
+          "resource_type" : "user"
+        },
+        "display_value" : null,
+        "resource_subtype" : "enum",
+        "resource_type" : "custom_field",
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "enum"
+      } ],
+      "due_at" : null,
+      "due_on" : "2025-09-30",
+      "followers" : [ {
+        "gid" : "1203273736108333",
+        "name" : "Laura Dolphin",
+        "resource_type" : "user"
+      } ],
+      "hearted" : false,
+      "hearts" : [ ],
+      "liked" : false,
+      "likes" : [ ],
+      "memberships" : [ {
+        "project" : {
+          "gid" : "1210390640814941",
+          "name" : "2. Credit Underwriting",
+          "resource_type" : "project"
+        },
+        "section" : {
+          "gid" : "1210390640814942",
+          "name" : "Untitled section",
+          "resource_type" : "section"
+        }
+      } ],
+      "modified_at" : "2025-05-27T15:21:27.644Z",
+      "name" : "Automated Approval Processes",
+      "notes" : "",
+      "num_hearts" : 0,
+      "num_likes" : 0,
+      "parent" : null,
+      "permalink_url" : "https://app.asana.com/1/1136653049084869/project/1210390640814941/task/1210390931454640",
+      "projects" : [ {
+        "gid" : "1210390640814941",
+        "name" : "2. Credit Underwriting",
+        "resource_type" : "project"
+      } ],
+      "resource_type" : "task",
+      "start_at" : null,
+      "start_on" : "2025-08-01",
+      "subtasks" : [ ],
+      "tags" : [ ],
+      "resource_subtype" : "default_task",
+      "workspace" : {
+        "gid" : "1136653049084869",
+        "name" : "Faye",
+        "resource_type" : "workspace"
+      }
+    }, {
+      "gid" : "1210390931454642",
+      "actual_time_minutes" : null,
+      "assignee" : null,
+      "assignee_status" : "upcoming",
+      "completed" : false,
+      "completed_at" : null,
+      "created_at" : "2025-05-27T15:14:06.432Z",
+      "custom_fields" : [ {
+        "gid" : "1202639773853589",
+        "enabled" : true,
+        "name" : "Start Date",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1209971237454910",
+          "name" : "Amy Kettelhut",
+          "resource_type" : "user"
+        },
+        "display_value" : "2025-10-01T00:00:00.000Z",
+        "resource_subtype" : "date",
+        "resource_type" : "custom_field",
+        "date_value" : {
+          "date" : "2025-10-01",
+          "date_time" : null
+        },
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "date"
+      }, {
+        "gid" : "1210476343980223",
+        "enabled" : true,
+        "enum_options" : [ {
+          "gid" : "1210476343980224",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Highest",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980225",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "High",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980226",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Medium",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980227",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Low",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476343980228",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Lowest",
+          "resource_type" : "enum_option"
+        } ],
+        "enum_value" : null,
+        "name" : "Jira priority",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1203273736108333",
+          "name" : "Laura Dolphin",
+          "resource_type" : "user"
+        },
+        "display_value" : null,
+        "resource_subtype" : "enum",
+        "resource_type" : "custom_field",
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "enum"
+      }, {
+        "gid" : "1210476342409926",
+        "enabled" : true,
+        "enum_options" : [ {
+          "gid" : "1210476342409927",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "New",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409928",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "In Progress",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409929",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Ready for QA",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409930",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Customer Review",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409931",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Canceled",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409932",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Sprint Backlog",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409933",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "To Do",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409934",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Internal Review",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409935",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Backlog",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409936",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Closed",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409937",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Dev Complete",
+          "resource_type" : "enum_option"
+        }, {
+          "gid" : "1210476342409938",
+          "color" : "none",
+          "enabled" : true,
+          "name" : "Blocked",
+          "resource_type" : "enum_option"
+        } ],
+        "enum_value" : null,
+        "name" : "Jira status",
+        "description" : "",
+        "created_by" : {
+          "gid" : "1203273736108333",
+          "name" : "Laura Dolphin",
+          "resource_type" : "user"
+        },
+        "display_value" : null,
+        "resource_subtype" : "enum",
+        "resource_type" : "custom_field",
+        "is_formula_field" : false,
+        "is_value_read_only" : false,
+        "type" : "enum"
+      } ],
+      "due_at" : null,
+      "due_on" : "2025-10-31",
+      "followers" : [ {
+        "gid" : "1203273736108333",
+        "name" : "Laura Dolphin",
+        "resource_type" : "user"
+      } ],
+      "hearted" : false,
+      "hearts" : [ ],
+      "liked" : false,
+      "likes" : [ ],
+      "memberships" : [ {
+        "project" : {
+          "gid" : "1210390640814941",
+          "name" : "2. Credit Underwriting",
+          "resource_type" : "project"
+        },
+        "section" : {
+          "gid" : "1210390640814942",
+          "name" : "Untitled section",
+          "resource_type" : "section"
+        }
+      } ],
+      "modified_at" : "2025-05-27T15:21:39.753Z",
+      "name" : "Sales Tax",
+      "notes" : "",
+      "num_hearts" : 0,
+      "num_likes" : 0,
+      "parent" : null,
+      "permalink_url" : "https://app.asana.com/1/1136653049084869/project/1210390640814941/task/1210390931454642",
+      "projects" : [ {
+        "gid" : "1210390640814941",
+        "name" : "2. Credit Underwriting",
+        "resource_type" : "project"
+      } ],
+      "resource_type" : "task",
+      "start_at" : null,
+      "start_on" : "2025-09-30",
+      "subtasks" : [ ],
+      "tags" : [ ],
+      "resource_subtype" : "default_task",
+      "workspace" : {
+        "gid" : "1136653049084869",
+        "name" : "Faye",
+        "resource_type" : "workspace"
+      }
+    } ]
+  }
