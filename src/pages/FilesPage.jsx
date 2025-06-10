@@ -121,7 +121,7 @@ export default function FilesPage() {
                     onClick={() => document.getElementById('import-file').click()}
                     disabled={isImporting}
                     variant="outline"
-                    className="border-purple-600 text-purple-600 hover:bg-purple-50"
+                    className="border-purple-600 text-purple-600 hover:bg-purple-100 focus:bg-purple-200 active:bg-purple-300 hover:text-purple-700 focus:text-purple-800 active:text-purple-900 transition-colors"
                   >
                     <Upload className="h-4 w-4 mr-2" />
                     {isImporting ? 'Importing...' : 'Import Data'}

@@ -1,12 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 import fs from 'fs'
+import tailwindcss from '@tailwindcss/vite'
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
-  base: '/portfoliomgr/',
   plugins: [
     react(),
     tailwindcss(),
@@ -19,8 +18,20 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, './src'),
     },
+  },
+  base: process.env.NODE_ENV === 'production' ? '/portfoliomgr/' : '/',
+  server: {
+    port: 5173,
+    strictPort: true,
+    host: true,
+    open: true,
+    historyApiFallback: {
+      rewrites: [
+        { from: /^\//, to: '/index.html' }
+      ]
+    }
   },
   build: {
     rollupOptions: {

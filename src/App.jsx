@@ -31,7 +31,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.j
 import { Button } from '@/components/ui/button.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
 import { Calendar, BarChart3, Users, Settings, Download, Upload, RotateCcw, Database, Save, ChevronLeft, ChevronRight, File } from 'lucide-react'
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import { HashRouter as Router, Routes, Route } from 'react-router-dom'
 import fayeLogo from './assets/faye-logo-white.png'
 import ValueStreamSidebar from './components/ValueStreamSidebar.jsx'
 import GanttChart from './components/GanttChart.jsx'
@@ -512,15 +512,14 @@ function PortfolioView() {
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
               </Button>
-              {/* Files Dropdown: combines Scenarios and Actions */}
-              <Link to="/files">
-                <Button 
-                  variant="outline" 
-                  className="text-white border-white bg-white/10 hover:bg-white/20"
-                >
-                  <File className="h-4 w-4 mr-2" /> Files
-                </Button>
-              </Link>
+              <Button 
+                variant={currentView === 'files' ? 'secondary' : 'ghost'}
+                onClick={() => setCurrentView('files')}
+                className="text-white hover:text-purple-200"
+              >
+                <File className="h-4 w-4 mr-2" />
+                Files
+              </Button>
             </nav>
           </div>
         </div>
@@ -673,6 +672,19 @@ function PortfolioView() {
               onUpdateResourceTypes={handleUpdateResourceTypes}
             />
           )}
+
+          {currentView === 'files' && (
+            <FilesPage
+              onExport={exportData}
+              onImport={importData}
+              onReset={resetData}
+              isExporting={false}
+              isImporting={false}
+              isResetting={false}
+              error={null}
+              fileInputRef={null}
+            />
+          )}
         </div>
       </div>
 
@@ -727,7 +739,6 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/files" element={<FilesPage />} />
         <Route path="/" element={<PortfolioView />} />
       </Routes>
     </Router>
