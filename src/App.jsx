@@ -166,6 +166,17 @@ function PortfolioView() {
   // On first mount, ensure state is loaded from last scenario
   useEffect(() => {
     try {
+      // Check if localStorage is available
+      const testKey = 'test_storage';
+      try {
+        localStorage.setItem(testKey, 'test');
+        localStorage.removeItem(testKey);
+      } catch (e) {
+        console.error('localStorage is not available:', e);
+        alert('Warning: Your browser settings are preventing data from being saved. Please check your privacy settings and allow storage for this site.');
+        return;
+      }
+
       const savedData = localStorage.getItem('portfolioData');
       console.log('Checking for saved data...');
       
@@ -315,7 +326,9 @@ function PortfolioView() {
         throw new Error('No file selected');
       }
       
-      const text = await file.text();
+      // Read file as ArrayBuffer first to handle potential CORS issues
+      const buffer = await file.arrayBuffer();
+      const text = new TextDecoder().decode(buffer);
       console.log('File read successfully:', text.substring(0, 100) + '...');
       
       const data = JSON.parse(text);
@@ -326,8 +339,12 @@ function PortfolioView() {
       }
       console.log('Data validation passed. Proceeding with import...');
       
-      // Store the imported data in localStorage
+      // Store the imported data in localStorage with error handling
       try {
+        // First try to clear any existing data
+        localStorage.removeItem('portfolioData');
+        
+        // Then store the new data
         localStorage.setItem('portfolioData', JSON.stringify(data));
         console.log('Data saved to localStorage');
         
@@ -352,7 +369,7 @@ function PortfolioView() {
         }, 500);
       } catch (storageError) {
         console.error('localStorage error:', storageError);
-        throw new Error('Failed to save data. Please check your browser settings.');
+        throw new Error('Failed to save data. Please check your browser settings and permissions.');
       }
     } catch (err) {
       console.error('Import failed:', err);
