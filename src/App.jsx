@@ -160,15 +160,46 @@ function PortfolioView() {
     return saved ? parseInt(saved, 10) : 0;
   });
   const ganttChartRef = useRef();
+  const [isImporting, setIsImporting] = useState(false);
+  const [error, setError] = useState(null);
 
   // On first mount, ensure state is loaded from last scenario
   useEffect(() => {
-    if (!initialLoadRef.current && lastScenario) {
-      setProjects(lastScenario.projects || initialProjects);
-      setValueStreams(lastScenario.valueStreams || initialValueStreams);
-      setResourceTypes(lastScenario.resourceTypes || initialResourceTypes);
-      setScenarioName(lastScenarioName || 'Default');
-      initialLoadRef.current = true;
+    try {
+      const savedData = localStorage.getItem('portfolioData');
+      console.log('Checking for saved data...');
+      
+      if (savedData) {
+        console.log('Found saved data, loading...');
+        const data = JSON.parse(savedData);
+        
+        if (data.projects && data.valueStreams && data.resourceTypes) {
+          console.log('Loading saved data:', {
+            projects: data.projects.length,
+            valueStreams: data.valueStreams.length,
+            resourceTypes: data.resourceTypes.length
+          });
+          
+          setProjects(data.projects);
+          setValueStreams(data.valueStreams);
+          setResourceTypes(data.resourceTypes);
+        } else {
+          console.log('Saved data missing required keys, using demo data');
+          setProjects(initialProjects);
+          setValueStreams(initialValueStreams);
+          setResourceTypes(initialResourceTypes);
+        }
+      } else {
+        console.log('No saved data found, using demo data');
+        setProjects(initialProjects);
+        setValueStreams(initialValueStreams);
+        setResourceTypes(initialResourceTypes);
+      }
+    } catch (error) {
+      console.error('Error loading saved data:', error);
+      setProjects(initialProjects);
+      setValueStreams(initialValueStreams);
+      setResourceTypes(initialResourceTypes);
     }
   }, []);
 
@@ -274,42 +305,66 @@ function PortfolioView() {
     linkElement.click()
   }
 
-  const importData = (event) => {
-    const file = event.target.files[0]
-    if (!file) return
-    
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      try {
-        const importedData = JSON.parse(e.target.result)
-        
-        // Validate the imported data structure
-        if (importedData.projects && importedData.valueStreams && importedData.resourceTypes) {
-          setProjects(importedData.projects)
-          setValueStreams(importedData.valueStreams)
-          setResourceTypes(importedData.resourceTypes)
-          
-          // Reset selections
-          setSelectedValueStream(null)
-          setCurrentView('portfolio')
-          
-          alert(`Successfully imported ${importedData.projects.length} projects and ${importedData.valueStreams.length} value streams!`)
-        } else {
-          alert('Invalid file format. Please select a valid Faye Portfolio export file.')
-        }
-      } catch (error) {
-        alert('Error reading file. Please ensure it\'s a valid JSON file.')
-        console.error('Import error:', error)
+  const handleImportData = async (file) => {
+    try {
+      setIsImporting(true);
+      setError(null);
+      console.log('Starting import process...');
+      
+      if (!file) {
+        throw new Error('No file selected');
       }
+      
+      const text = await file.text();
+      console.log('File read successfully:', text.substring(0, 100) + '...');
+      
+      const data = JSON.parse(text);
+      console.log('JSON parsed successfully. Keys:', Object.keys(data));
+      
+      if (!data.projects || !data.valueStreams || !data.resourceTypes) {
+        throw new Error('Invalid data format. Missing required keys.');
+      }
+      console.log('Data validation passed. Proceeding with import...');
+      
+      // Store the imported data in localStorage
+      try {
+        localStorage.setItem('portfolioData', JSON.stringify(data));
+        console.log('Data saved to localStorage');
+        
+        // Verify the data was saved
+        const savedData = localStorage.getItem('portfolioData');
+        if (!savedData) {
+          throw new Error('Failed to verify data was saved');
+        }
+        
+        // Update state with imported data
+        setProjects(data.projects);
+        setValueStreams(data.valueStreams);
+        setResourceTypes(data.resourceTypes);
+        console.log('State updated with imported data');
+        
+        // Show success message
+        alert(`Successfully imported ${data.projects.length} projects, ${data.valueStreams.length} value streams, and ${data.resourceTypes.length} resource types!`);
+        
+        // Small delay to ensure data is saved before reload
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      } catch (storageError) {
+        console.error('localStorage error:', storageError);
+        throw new Error('Failed to save data. Please check your browser settings.');
+      }
+    } catch (err) {
+      console.error('Import failed:', err);
+      setError(err.message);
+      alert(`Import failed: ${err.message}`);
+    } finally {
+      setIsImporting(false);
     }
-    reader.readAsText(file)
-    
-    // Reset the input so the same file can be imported again
-    event.target.value = ''
-  }
+  };
 
   const triggerImport = () => {
-    document.getElementById('file-import').click()
+    document.getElementById('import-file').click()
   }
 
   const resetData = () => {
@@ -676,12 +731,12 @@ function PortfolioView() {
           {currentView === 'files' && (
             <FilesPage
               onExport={exportData}
-              onImport={importData}
+              onImport={handleImportData}
               onReset={resetData}
               isExporting={false}
-              isImporting={false}
+              isImporting={isImporting}
               isResetting={false}
-              error={null}
+              error={error}
               fileInputRef={null}
             />
           )}
@@ -702,10 +757,11 @@ function PortfolioView() {
       
       {/* Hidden file input for import */}
       <input
-        id="file-import"
+        id="import-file"
+        ref={null}
         type="file"
         accept=".json"
-        onChange={importData}
+        onChange={(e) => handleImportData(e.target.files[0])}
         style={{ display: 'none' }}
       />
 
