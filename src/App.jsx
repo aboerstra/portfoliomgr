@@ -378,29 +378,83 @@ function PortfolioView() {
       const text = new TextDecoder().decode(buffer);
       console.log('File read successfully:', text.substring(0, 100) + '...');
       
-      const data = JSON.parse(text);
-      console.log('JSON parsed successfully. Keys:', Object.keys(data));
-      
-      if (!data.projects || !data.valueStreams || !data.resourceTypes) {
-        throw new Error('Invalid data format. Missing required keys.');
+      let data;
+      try {
+        data = JSON.parse(text);
+        console.log('JSON parsed successfully. Keys:', Object.keys(data));
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        throw new Error('Invalid JSON format. Please ensure the file is properly formatted JSON.');
       }
+      
+      // Validate data structure
+      if (!data || typeof data !== 'object') {
+        throw new Error('Invalid data: Root must be an object');
+      }
+      
+      // Check for required keys
+      const requiredKeys = ['projects', 'valueStreams', 'resourceTypes'];
+      const missingKeys = requiredKeys.filter(key => !(key in data));
+      if (missingKeys.length > 0) {
+        throw new Error(`Missing required keys: ${missingKeys.join(', ')}`);
+      }
+      
+      // Validate each array
+      if (!Array.isArray(data.projects)) {
+        throw new Error('Projects must be an array');
+      }
+      if (!Array.isArray(data.valueStreams)) {
+        throw new Error('Value Streams must be an array');
+      }
+      if (!Array.isArray(data.resourceTypes)) {
+        throw new Error('Resource Types must be an array');
+      }
+      
+      // Clean and normalize the data
+      const cleanData = {
+        projects: data.projects.map(project => ({
+          ...project,
+          id: String(project.id || Math.random().toString(36).substr(2, 9)),
+          name: String(project.name || ''),
+          startDate: project.startDate ? new Date(project.startDate).toISOString() : null,
+          endDate: project.endDate ? new Date(project.endDate).toISOString() : null,
+          valueStreamId: project.valueStreamId ? String(project.valueStreamId) : null,
+          resourceTypeId: project.resourceTypeId ? String(project.resourceTypeId) : null,
+          status: String(project.status || 'Not Started'),
+          priority: String(project.priority || 'Medium'),
+          description: String(project.description || '')
+        })),
+        valueStreams: data.valueStreams.map(vs => ({
+          ...vs,
+          id: String(vs.id || Math.random().toString(36).substr(2, 9)),
+          name: String(vs.name || ''),
+          description: String(vs.description || '')
+        })),
+        resourceTypes: data.resourceTypes.map(rt => ({
+          ...rt,
+          id: String(rt.id || Math.random().toString(36).substr(2, 9)),
+          name: String(rt.name || ''),
+          description: String(rt.description || '')
+        }))
+      };
+      
       console.log('Data validation passed. Proceeding with import...');
       
       // Save data using the helper function
-      const saveSuccess = saveData(data);
+      const saveSuccess = saveData(cleanData);
       if (!saveSuccess) {
         throw new Error('Failed to save data to any storage. Please check your browser settings.');
       }
       
       // Update state with imported data
       console.log('Updating application state...');
-      setProjects(data.projects);
-      setValueStreams(data.valueStreams);
-      setResourceTypes(data.resourceTypes);
+      setProjects(cleanData.projects);
+      setValueStreams(cleanData.valueStreams);
+      setResourceTypes(cleanData.resourceTypes);
       console.log('State updated with imported data');
       
       // Show success message
-      alert(`Successfully imported ${data.projects.length} projects, ${data.valueStreams.length} value streams, and ${data.resourceTypes.length} resource types!`);
+      alert(`Successfully imported ${cleanData.projects.length} projects, ${cleanData.valueStreams.length} value streams, and ${cleanData.resourceTypes.length} resource types!`);
       
       // Small delay to ensure data is saved before reload
       console.log('Waiting 500ms before reload...');
