@@ -31,12 +31,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.j
 import { Button } from '@/components/ui/button.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
 import { Calendar, BarChart3, Users, Settings, Download, Upload, RotateCcw, Database, Save, ChevronLeft, ChevronRight, File } from 'lucide-react'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import fayeLogo from './assets/faye-logo-white.png'
 import ValueStreamSidebar from './components/ValueStreamSidebar.jsx'
 import GanttChart from './components/GanttChart.jsx'
 import ProjectForm from './components/ProjectForm.jsx'
 import ResourcePlanningPanel from './components/ResourcePlanningPanel.jsx'
 import SettingsPanel from './components/SettingsPanel.jsx'
+import FilesPage from './pages/FilesPage.jsx'
 import './App.css'
 import { projects as initialProjects, valueStreams as initialValueStreams, resourceTypes as initialResourceTypes } from './data/sampleData.js';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
@@ -130,7 +132,7 @@ function parseAsanaTasks(asanaJson, valueStreamId) {
   return importedProjects;
 }
 
-function App() {
+function PortfolioView() {
   // Load last scenario only once on mount
   const initialLoadRef = useRef(false);
   const lastScenarioName = loadLastScenarioName();
@@ -511,29 +513,14 @@ function App() {
                 Settings
               </Button>
               {/* Files Dropdown: combines Scenarios and Actions */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className="text-white border-white bg-white/10 hover:bg-white/20"
-                    type="button"
-                  >
-                    <File className="h-4 w-4 mr-2" /> Files
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem>
-                    <Download className="h-4 w-4 mr-2" /> Export Data
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Upload className="h-4 w-4 mr-2" /> Import Data
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <RotateCcw className="h-4 w-4 mr-2" /> Reset Data
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Link to="/files">
+                <Button 
+                  variant="outline" 
+                  className="text-white border-white bg-white/10 hover:bg-white/20"
+                >
+                  <File className="h-4 w-4 mr-2" /> Files
+                </Button>
+              </Link>
             </nav>
           </div>
         </div>
@@ -736,5 +723,14 @@ function App() {
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/files" element={<FilesPage />} />
+        <Route path="/" element={<PortfolioView />} />
+      </Routes>
+    </Router>
+  );
+}
 
