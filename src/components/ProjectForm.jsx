@@ -37,7 +37,10 @@ const ProjectForm = ({
     pmAllocation: 20,
     autoPopulatePM: false,
     hoursUsed: 0,
-    totalHours: 0
+    totalHours: 0,
+    simpleMode: false,
+    estimatedHours: 0,
+    pmHours: 0
   });
 
   const [newMilestone, setNewMilestone] = useState({
@@ -60,6 +63,11 @@ const ProjectForm = ({
   useEffect(() => {
     if (isOpen) {
       if (editingProject) {
+        // Calculate PM hours based on auto-populate setting
+        const pmHours = editingProject.autoPopulatePM ? 
+          Math.ceil(editingProject.estimatedHours * (editingProject.pmAllocation / 100)) : 
+          (editingProject.resources?.['rt-1']?.hours || 0);
+
         setFormData({
           ...editingProject,
           startDate: editingProject.startDate,
@@ -67,7 +75,14 @@ const ProjectForm = ({
           milestones: editingProject.milestones || [],
           asanaUrl: editingProject.asanaUrl || '',
           pmAllocation: editingProject.pmAllocation || 20,
-          autoPopulatePM: editingProject.autoPopulatePM || false
+          autoPopulatePM: editingProject.autoPopulatePM || false,
+          estimatedHours: editingProject.estimatedHours || 0,
+          pmHours: pmHours,
+          totalHours: editingProject.simpleMode ? 
+            (editingProject.estimatedHours || 0) + pmHours :
+            Object.values(editingProject.resources || {})
+              .filter(resource => resource.id !== 'rt-1')
+              .reduce((sum, resource) => sum + (resource.hours || 0), 0) + pmHours
         });
       } else {
         setFormData({
@@ -85,7 +100,10 @@ const ProjectForm = ({
           pmAllocation: 20,
           autoPopulatePM: false,
           hoursUsed: 0,
-          totalHours: 0
+          totalHours: 0,
+          simpleMode: false,
+          estimatedHours: 0,
+          pmHours: 0
         });
       }
     }
@@ -146,63 +164,114 @@ const ProjectForm = ({
   };
 
   const handleInputChange = (field, value) => {
+    if (field === 'simpleMode') {
+      // When switching to simple mode, calculate total from estimated + PM
+      // When switching to detailed mode, calculate total from resources + PM
+      const pmHours = formData.autoPopulatePM ? 
+        Math.ceil(formData.estimatedHours * (formData.pmAllocation / 100)) : 
+        formData.pmHours;
+      const totalHours = value ? 
+        formData.estimatedHours + pmHours : 
+        Object.values(formData.resources || {})
+          .filter(resource => resource.id !== 'rt-1')
+          .reduce((sum, resource) => sum + (resource.hours || 0), 0) + pmHours;
+
+      setFormData(prev => ({
+        ...prev,
+        simpleMode: value,
+        totalHours
+      }));
+      return;
+    }
+
+    if (field === 'estimatedHours') {
+      const estimatedHours = parseInt(value) || 0;
+      const pmHours = formData.autoPopulatePM ? 
+        Math.ceil(estimatedHours * (formData.pmAllocation / 100)) : 
+        formData.pmHours;
+      setFormData(prev => ({
+        ...prev,
+        estimatedHours,
+        pmHours: formData.autoPopulatePM ? pmHours : prev.pmHours,
+        totalHours: formData.simpleMode ? estimatedHours + pmHours : prev.totalHours,
+        resources: {
+          ...prev.resources,
+          'rt-1': { // Project Manager resource type
+            required: 1,
+            allocated: 1,
+            hours: pmHours
+          }
+        }
+      }));
+      return;
+    }
+
+    if (field === 'pmAllocation') {
+      const pmHours = formData.autoPopulatePM ? 
+        Math.ceil(formData.estimatedHours * (value / 100)) : 
+        formData.pmHours;
+      setFormData(prev => ({
+        ...prev,
+        pmAllocation: value,
+        pmHours: formData.autoPopulatePM ? pmHours : prev.pmHours,
+        totalHours: formData.simpleMode ? prev.estimatedHours + pmHours : prev.totalHours,
+        resources: {
+          ...prev.resources,
+          'rt-1': { // Project Manager resource type
+            required: 1,
+            allocated: 1,
+            hours: pmHours
+          }
+        }
+      }));
+      return;
+    }
+
+    if (field === 'pmHours') {
+      const pmHours = parseInt(value) || 0;
+      setFormData(prev => ({
+        ...prev,
+        pmHours,
+        totalHours: formData.simpleMode ? prev.estimatedHours + pmHours : prev.totalHours,
+        resources: {
+          ...prev.resources,
+          'rt-1': { // Project Manager resource type
+            required: 1,
+            allocated: 1,
+            hours: pmHours
+          }
+        }
+      }));
+      return;
+    }
+
     if (field === 'autoPopulatePM') {
-      // Calculate PM hours when auto-populate is checked
-      if (value) {
-        // Calculate total non-PM hours
-        const totalNonPMHours = Object.entries(formData.resources)
-          .filter(([type]) => type !== 'rt-1')
-          .reduce((sum, [_, { hours }]) => sum + (hours || 0), 0);
-        
-        // Calculate PM hours as percentage of total non-PM hours
-        const pmHours = Math.ceil(totalNonPMHours * (formData.pmAllocation / 100));
-        
-        setFormData(prev => ({
-          ...prev,
-          autoPopulatePM: value,
-          resources: {
-            ...prev.resources,
-            'rt-1': { // Project Manager resource type
-              required: 1,
-              allocated: 1,
-              hours: pmHours
-            }
+      const pmHours = value ? 
+        Math.ceil(formData.estimatedHours * (formData.pmAllocation / 100)) : 
+        formData.pmHours;
+      setFormData(prev => ({
+        ...prev,
+        autoPopulatePM: value,
+        pmHours: value ? pmHours : prev.pmHours,
+        totalHours: formData.simpleMode ? prev.estimatedHours + pmHours : prev.totalHours,
+        resources: {
+          ...prev.resources,
+          'rt-1': { // Project Manager resource type
+            required: 1,
+            allocated: 1,
+            hours: pmHours
           }
-        }));
-      } else {
-        setFormData(prev => ({
-          ...prev,
-          autoPopulatePM: value
-        }));
-      }
-    } else if (field === 'pmAllocation') {
-      // Always recalculate PM hours when allocation changes if auto-populate is checked
-      if (formData.autoPopulatePM) {
-        const totalNonPMHours = Object.entries(formData.resources)
-          .filter(([type]) => type !== 'rt-1')
-          .reduce((sum, [_, { hours }]) => sum + (hours || 0), 0);
-        
-        const pmHours = Math.ceil(totalNonPMHours * (value / 100));
-        
-        setFormData(prev => ({
-          ...prev,
-          pmAllocation: value,
-          resources: {
-            ...prev.resources,
-            'rt-1': { // Project Manager resource type
-              required: 1,
-              allocated: 1,
-              hours: pmHours
-            }
-          }
-        }));
-      } else {
-        setFormData(prev => ({
-          ...prev,
-          pmAllocation: value
-        }));
-      }
-    } else if (field === 'resources' && formData.autoPopulatePM) {
+        }
+      }));
+      return;
+    }
+
+    if (field === 'totalHours') {
+      // Total hours should never be directly editable
+      return;
+    }
+
+    if (field === 'resources' && formData.autoPopulatePM) {
       // Recalculate PM hours when other resource hours change and auto-populate is checked
       const pmHours = calculatePMHours(value, formData.pmAllocation);
       
@@ -235,27 +304,16 @@ const ProjectForm = ({
         }
       };
 
-      // If auto-populate is checked and we're changing hours for a non-PM resource
-      if (prev.autoPopulatePM && field === 'hours' && resourceType !== 'rt-1') {
-        // Calculate total non-PM hours
-        const totalNonPMHours = Object.entries(newResources)
-          .filter(([type]) => type !== 'rt-1')
-          .reduce((sum, [_, { hours }]) => sum + (hours || 0), 0);
-        
-        // Calculate PM hours as percentage of total non-PM hours
-        const pmHours = Math.ceil(totalNonPMHours * (prev.pmAllocation / 100));
-        
-        // Update PM hours
-        newResources['rt-1'] = {
-          required: 1,
-          allocated: 1,
-          hours: pmHours
-        };
-      }
+      // Calculate total hours from resources + PM hours
+      const pmHours = Math.ceil(prev.estimatedHours * (prev.pmAllocation / 100));
+      const totalHours = Object.values(newResources)
+        .filter(resource => resource.id !== 'rt-1')
+        .reduce((sum, resource) => sum + (resource.hours || 0), 0) + pmHours;
 
       return {
         ...prev,
-        resources: newResources
+        resources: newResources,
+        totalHours: !prev.simpleMode ? totalHours : prev.totalHours
       };
     });
   };
@@ -524,92 +582,178 @@ const ProjectForm = ({
             </div>
 
             {/* Hours Tracking */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="hoursUsed">Hours Used</Label>
-                <Input
-                  id="hoursUsed"
-                  type="number"
-                  min="0"
-                  value={formData.hoursUsed}
-                  onChange={(e) => handleInputChange('hoursUsed', parseInt(e.target.value) || 0)}
-                  placeholder="Enter hours used"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="totalHours">Total Hours</Label>
-                <Input
-                  id="totalHours"
-                  type="number"
-                  min="0"
-                  value={formData.totalHours}
-                  onChange={(e) => handleInputChange('totalHours', parseInt(e.target.value) || 0)}
-                  placeholder="Enter total hours"
-                />
-              </div>
-            </div>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Hours Tracking</h3>
 
-            {/* Progress Display */}
-            <div className="mt-2">
-              <Label>Progress</Label>
-              <div className="flex items-center space-x-2">
-                <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-purple-600 transition-all duration-300"
-                    style={{ width: `${formData.totalHours > 0 ? (formData.hoursUsed / formData.totalHours) * 100 : 0}%` }}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="estimatedHours">Estimated Hours</Label>
+                  <Input
+                    id="estimatedHours"
+                    type="number"
+                    min="0"
+                    value={formData.estimatedHours}
+                    onChange={(e) => handleInputChange('estimatedHours', e.target.value)}
+                    placeholder="Enter estimated hours"
                   />
                 </div>
-                <span className="text-sm text-gray-600">
-                  {formData.totalHours > 0 ? Math.round((formData.hoursUsed / formData.totalHours) * 100) : 0}%
-                </span>
+                
+                <div>
+                  <Label htmlFor="pmHours">PM Hours</Label>
+                  <Input
+                    id="pmHours"
+                    type="number"
+                    min="0"
+                    value={formData.autoPopulatePM ? 
+                      Math.ceil(formData.estimatedHours * (formData.pmAllocation / 100)) : 
+                      formData.pmHours}
+                    onChange={(e) => handleInputChange('pmHours', e.target.value)}
+                    readOnly={!formData.simpleMode || formData.autoPopulatePM}
+                    className={(!formData.simpleMode || formData.autoPopulatePM) ? "bg-gray-50 cursor-not-allowed" : ""}
+                    placeholder={formData.autoPopulatePM ? 
+                      "Calculated from estimated hours" : 
+                      "Enter PM hours"}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="totalHours">Total Hours (Est. + PM)</Label>
+                  <Input
+                    id="totalHours"
+                    type="number"
+                    min="0"
+                    value={formData.totalHours}
+                    readOnly
+                    className="bg-gray-50 cursor-not-allowed"
+                    placeholder={formData.simpleMode ? 
+                      "Calculated from estimated hours + PM" : 
+                      "Calculated from resource hours + PM"}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="hoursUsed">Hours Used</Label>
+                  <Input
+                    id="hoursUsed"
+                    type="number"
+                    min="0"
+                    value={formData.hoursUsed}
+                    onChange={(e) => handleInputChange('hoursUsed', parseInt(e.target.value) || 0)}
+                    placeholder="Enter hours used"
+                  />
+                </div>
+              </div>
+
+              {/* Progress Display */}
+              <div className="mt-2">
+                <Label>Progress</Label>
+                <div className="flex items-center space-x-2">
+                  <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-purple-600 transition-all duration-300"
+                      style={{ width: `${formData.totalHours > 0 ? (formData.hoursUsed / formData.totalHours) * 100 : 0}%` }}
+                    />
+                  </div>
+                  <span className="text-sm text-gray-600">
+                    {formData.totalHours > 0 ? Math.round((formData.hoursUsed / formData.totalHours) * 100) : 0}%
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Resource Allocation */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold mt-8">Resource Allocation</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Resource Allocation</h3>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="simpleMode"
+                  checked={formData.simpleMode}
+                  onChange={(e) => handleInputChange('simpleMode', e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                />
+                <Label htmlFor="simpleMode" className="text-sm text-gray-700">
+                  Simple Mode
+                </Label>
+              </div>
+            </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              {resourceTypes.map((resourceType) => (
-                <div key={resourceType.id} className="space-y-2">
-                  <Label className="text-base">{resourceType.name}</Label>
-                  <div className="flex space-x-2">
-                    <div className="flex-1">
-                      <Input
-                        type="number"
-                        placeholder="Required"
-                        value={formData.resources[resourceType.id]?.required || ''}
-                        onChange={(e) => handleResourceChange(resourceType.id, 'required', e.target.value)}
-                        min="0"
-                      />
-                      <div className="text-xs text-gray-500 mt-1">Required</div>
+            {!formData.simpleMode && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  {resourceTypes.map((resourceType) => (
+                    <div key={resourceType.id} className="space-y-2">
+                      <Label className="text-base">{resourceType.name}</Label>
+                      <div className="flex space-x-2">
+                        <div className="flex-1">
+                          <Input
+                            type="number"
+                            placeholder="Required"
+                            value={formData.resources[resourceType.id]?.required || ''}
+                            onChange={(e) => handleResourceChange(resourceType.id, 'required', e.target.value)}
+                            min="0"
+                          />
+                          <div className="text-xs text-gray-500 mt-1">Required</div>
+                        </div>
+                        <div className="flex-1">
+                          <Input
+                            type="number"
+                            placeholder="Allocated"
+                            value={formData.resources[resourceType.id]?.allocated || ''}
+                            onChange={(e) => handleResourceChange(resourceType.id, 'allocated', e.target.value)}
+                            min="0"
+                          />
+                          <div className="text-xs text-gray-500 mt-1">Allocated</div>
+                        </div>
+                        <div className="flex-1">
+                          <Input
+                            type="number"
+                            placeholder="Hours Required"
+                            value={formData.resources[resourceType.id]?.hours || ''}
+                            onChange={(e) => handleResourceChange(resourceType.id, 'hours', e.target.value)}
+                            min="0"
+                          />
+                          <div className="text-xs text-gray-500 mt-1">Hours</div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <Input
-                        type="number"
-                        placeholder="Allocated"
-                        value={formData.resources[resourceType.id]?.allocated || ''}
-                        onChange={(e) => handleResourceChange(resourceType.id, 'allocated', e.target.value)}
-                        min="0"
-                      />
-                      <div className="text-xs text-gray-500 mt-1">Allocated</div>
-                    </div>
-                    <div className="flex-1">
-                      <Input
-                        type="number"
-                        placeholder="Hours Required"
-                        value={formData.resources[resourceType.id]?.hours || ''}
-                        onChange={(e) => handleResourceChange(resourceType.id, 'hours', e.target.value)}
-                        min="0"
-                      />
-                      <div className="text-xs text-gray-500 mt-1">Hours</div>
-                    </div>
+                  ))}
+                </div>
+
+                {/* PM Allocation */}
+                <div className="mt-6 space-y-4">
+                  <div>
+                    <Label htmlFor="pmAllocation">PM Allocation (%)</Label>
+                    <Input
+                      id="pmAllocation"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.pmAllocation}
+                      onChange={(e) => handleInputChange('pmAllocation', parseInt(e.target.value) || 0)}
+                      placeholder="Enter PM allocation percentage"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="autoPopulatePM"
+                      checked={formData.autoPopulatePM}
+                      onChange={(e) => handleInputChange('autoPopulatePM', e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                    />
+                    <Label htmlFor="autoPopulatePM" className="text-sm text-gray-700">
+                      Auto-populate PM hours based on allocation
+                    </Label>
                   </div>
                 </div>
-              ))}
-            </div>
+              </>
+            )}
           </div>
 
           {/* Milestones */}
