@@ -39,12 +39,12 @@ import ProjectForm from './components/ProjectForm.jsx'
 import ResourcePlanningPanel from './components/ResourcePlanningPanel.jsx'
 import SettingsPanel from './components/SettingsPanel.jsx'
 import FilesPage from './pages/FilesPage.jsx'
+import RocksPlanning from './components/RocksPlanning.jsx'
 import './App.css'
 import { projects as initialProjects, valueStreams as initialValueStreams, resourceTypes as initialResourceTypes } from './data/sampleData.js';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import QuarterlyView from './components/QuarterlyView.jsx';
 
 function parseAsanaTasks(asanaJson, valueStreamId) {
   if (!asanaJson || !Array.isArray(asanaJson.data)) {
@@ -697,20 +697,20 @@ function PortfolioView() {
                 Portfolio View
               </Button>
               <Button 
-                variant={currentView === 'resources' ? 'secondary' : 'ghost'}
-                onClick={() => setCurrentView('resources')}
+                variant={currentView === 'resource-planning' ? 'secondary' : 'ghost'}
+                onClick={() => setCurrentView('resource-planning')}
                 className="text-white hover:text-purple-200"
               >
                 <Users className="h-4 w-4 mr-2" />
                 Resource Planning
               </Button>
               <Button 
-                variant={currentView === 'quarterly' ? 'secondary' : 'ghost'}
-                onClick={() => setCurrentView('quarterly')}
+                variant={currentView === 'rocks-planning' ? 'secondary' : 'ghost'}
+                onClick={() => setCurrentView('rocks-planning')}
                 className="text-white hover:text-purple-200"
               >
                 <Calendar className="h-4 w-4 mr-2" />
-                Quarterly View
+                Rocks Planning
               </Button>
               <Button 
                 variant={currentView === 'settings' ? 'secondary' : 'ghost'}
@@ -886,7 +886,7 @@ function PortfolioView() {
             </div>
           )}
 
-          {currentView === 'resources' && (
+          {currentView === 'resource-planning' && (
             <ResourcePlanningPanel
               projects={projects}
               resourceTypes={resourceTypes}
@@ -894,8 +894,13 @@ function PortfolioView() {
             />
           )}
 
-          {currentView === 'quarterly' && (
-            <QuarterlyView valueStreams={valueStreams} projects={projects} resourceTypes={resourceTypes} />
+          {currentView === 'rocks-planning' && (
+            <RocksPlanning
+              valueStreams={valueStreams}
+              projects={projects}
+              resourceTypes={resourceTypes}
+              onUpdateProjects={setProjects}
+            />
           )}
 
           {currentView === 'settings' && (

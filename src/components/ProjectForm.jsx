@@ -33,7 +33,11 @@ const ProjectForm = ({
     valueStreamId: valueStreamId || '',
     resources: {},
     milestones: [],
-    asanaUrl: ''
+    asanaUrl: '',
+    pmAllocation: 20,
+    autoPopulatePM: false,
+    hoursUsed: 0,
+    totalHours: 0
   });
 
   const [newMilestone, setNewMilestone] = useState({
@@ -61,7 +65,9 @@ const ProjectForm = ({
           startDate: editingProject.startDate,
           endDate: editingProject.endDate,
           milestones: editingProject.milestones || [],
-          asanaUrl: editingProject.asanaUrl || ''
+          asanaUrl: editingProject.asanaUrl || '',
+          pmAllocation: editingProject.pmAllocation || 20,
+          autoPopulatePM: editingProject.autoPopulatePM || false
         });
       } else {
         setFormData({
@@ -75,7 +81,11 @@ const ProjectForm = ({
           valueStreamId: valueStreamId || '',
           resources: {},
           milestones: [],
-          asanaUrl: ''
+          asanaUrl: '',
+          pmAllocation: 20,
+          autoPopulatePM: false,
+          hoursUsed: 0,
+          totalHours: 0
         });
       }
     }
@@ -97,31 +107,157 @@ const ProjectForm = ({
 
   // When dateRange changes, update formData
   useEffect(() => {
-    setFormData(prev => ({
-      ...prev,
-      startDate: dateRange.from ? dateRange.from.toISOString().split('T')[0] : '',
-      endDate: dateRange.to ? dateRange.to.toISOString().split('T')[0] : ''
-    }));
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        startDate: dateRange.from ? dateRange.from.toISOString().split('T')[0] : '',
+        endDate: dateRange.to ? dateRange.to.toISOString().split('T')[0] : ''
+      };
+
+      // Calculate PM hours if auto-populate is checked and we have both dates
+      if (newData.autoPopulatePM && newData.startDate && newData.endDate) {
+        const startDate = new Date(newData.startDate);
+        const endDate = new Date(newData.endDate);
+        const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+        const pmHours = Math.ceil(daysDiff * 8 * (newData.pmAllocation / 100)); // Convert percentage to decimal
+        
+        newData.resources = {
+          ...newData.resources,
+          'rt-1': { // Project Manager resource type
+            required: 1,
+            allocated: 1,
+            hours: pmHours
+          }
+        };
+      }
+
+      return newData;
+    });
   }, [dateRange]);
 
+  const calculatePMHours = (resources, pmAllocation) => {
+    // Sum up all non-PM resource hours
+    const totalNonPMHours = Object.entries(resources || {})
+      .filter(([type]) => type !== 'rt-1') // Exclude PM hours
+      .reduce((sum, [_, { hours }]) => sum + (hours || 0), 0);
+    
+    // Calculate PM hours as percentage of total non-PM hours
+    return Math.ceil(totalNonPMHours * (pmAllocation / 100));
+  };
+
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    if (field === 'autoPopulatePM') {
+      // Calculate PM hours when auto-populate is checked
+      if (value) {
+        // Calculate total non-PM hours
+        const totalNonPMHours = Object.entries(formData.resources)
+          .filter(([type]) => type !== 'rt-1')
+          .reduce((sum, [_, { hours }]) => sum + (hours || 0), 0);
+        
+        // Calculate PM hours as percentage of total non-PM hours
+        const pmHours = Math.ceil(totalNonPMHours * (formData.pmAllocation / 100));
+        
+        setFormData(prev => ({
+          ...prev,
+          autoPopulatePM: value,
+          resources: {
+            ...prev.resources,
+            'rt-1': { // Project Manager resource type
+              required: 1,
+              allocated: 1,
+              hours: pmHours
+            }
+          }
+        }));
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          autoPopulatePM: value
+        }));
+      }
+    } else if (field === 'pmAllocation') {
+      // Always recalculate PM hours when allocation changes if auto-populate is checked
+      if (formData.autoPopulatePM) {
+        const totalNonPMHours = Object.entries(formData.resources)
+          .filter(([type]) => type !== 'rt-1')
+          .reduce((sum, [_, { hours }]) => sum + (hours || 0), 0);
+        
+        const pmHours = Math.ceil(totalNonPMHours * (value / 100));
+        
+        setFormData(prev => ({
+          ...prev,
+          pmAllocation: value,
+          resources: {
+            ...prev.resources,
+            'rt-1': { // Project Manager resource type
+              required: 1,
+              allocated: 1,
+              hours: pmHours
+            }
+          }
+        }));
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          pmAllocation: value
+        }));
+      }
+    } else if (field === 'resources' && formData.autoPopulatePM) {
+      // Recalculate PM hours when other resource hours change and auto-populate is checked
+      const pmHours = calculatePMHours(value, formData.pmAllocation);
+      
+      setFormData(prev => ({
+        ...prev,
+        resources: {
+          ...value,
+          'rt-1': { // Project Manager resource type
+            required: 1,
+            allocated: 1,
+            hours: pmHours
+          }
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
   };
 
   const handleResourceChange = (resourceType, field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      resources: {
+    setFormData(prev => {
+      const newResources = {
         ...prev.resources,
         [resourceType]: {
           ...prev.resources[resourceType],
           [field]: field === 'hours' ? parseFloat(value) || 0 : parseInt(value) || 0
         }
+      };
+
+      // If auto-populate is checked and we're changing hours for a non-PM resource
+      if (prev.autoPopulatePM && field === 'hours' && resourceType !== 'rt-1') {
+        // Calculate total non-PM hours
+        const totalNonPMHours = Object.entries(newResources)
+          .filter(([type]) => type !== 'rt-1')
+          .reduce((sum, [_, { hours }]) => sum + (hours || 0), 0);
+        
+        // Calculate PM hours as percentage of total non-PM hours
+        const pmHours = Math.ceil(totalNonPMHours * (prev.pmAllocation / 100));
+        
+        // Update PM hours
+        newResources['rt-1'] = {
+          required: 1,
+          allocated: 1,
+          hours: pmHours
+        };
       }
-    }));
+
+      return {
+        ...prev,
+        resources: newResources
+      };
+    });
   };
 
   const addMilestone = () => {
@@ -172,11 +308,28 @@ const ProjectForm = ({
 
   const handleSave = () => {
     if (formData.name && formData.valueStreamId && formData.startDate && formData.endDate) {
-      const project = {
+      let project = {
         ...formData,
         id: editingProject ? editingProject.id : `proj-${Date.now()}`,
-        progress: editingProject ? editingProject.progress : 0
+        progress: formData.totalHours > 0 ? Math.round((formData.hoursUsed / formData.totalHours) * 100) : 0
       };
+      
+      // Calculate PM hours if auto-populate is checked
+      if (formData.autoPopulatePM) {
+        const startDate = new Date(formData.startDate);
+        const endDate = new Date(formData.endDate);
+        const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+        const pmHours = Math.ceil((daysDiff * 8 * formData.pmAllocation) / 100); // 8 hours per day
+        
+        project.resources = {
+          ...project.resources,
+          'rt-1': { // Project Manager resource type
+            required: 1,
+            allocated: 1,
+            hours: pmHours
+          }
+        };
+      }
       
       onSave(project);
       
@@ -191,7 +344,11 @@ const ProjectForm = ({
         status: 'planned',
         resources: {},
         milestones: [],
-        asanaUrl: ''
+        asanaUrl: '',
+        pmAllocation: 20,
+        autoPopulatePM: false,
+        hoursUsed: 0,
+        totalHours: 0
       });
       
       onClose();
@@ -334,6 +491,78 @@ const ProjectForm = ({
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+            </div>
+
+            {/* PM Allocation */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="pmAllocation">Project Manager Allocation (%)</Label>
+                <Input
+                  id="pmAllocation"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={formData.pmAllocation}
+                  onChange={(e) => handleInputChange('pmAllocation', parseInt(e.target.value) || 0)}
+                  placeholder="Enter PM allocation percentage"
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2 mt-6">
+                <input
+                  type="checkbox"
+                  id="autoPopulatePM"
+                  checked={formData.autoPopulatePM}
+                  onChange={(e) => handleInputChange('autoPopulatePM', e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                />
+                <Label htmlFor="autoPopulatePM" className="text-sm text-gray-700">
+                  Auto-populate PM hours based on allocation
+                </Label>
+              </div>
+            </div>
+
+            {/* Hours Tracking */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="hoursUsed">Hours Used</Label>
+                <Input
+                  id="hoursUsed"
+                  type="number"
+                  min="0"
+                  value={formData.hoursUsed}
+                  onChange={(e) => handleInputChange('hoursUsed', parseInt(e.target.value) || 0)}
+                  placeholder="Enter hours used"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="totalHours">Total Hours</Label>
+                <Input
+                  id="totalHours"
+                  type="number"
+                  min="0"
+                  value={formData.totalHours}
+                  onChange={(e) => handleInputChange('totalHours', parseInt(e.target.value) || 0)}
+                  placeholder="Enter total hours"
+                />
+              </div>
+            </div>
+
+            {/* Progress Display */}
+            <div className="mt-2">
+              <Label>Progress</Label>
+              <div className="flex items-center space-x-2">
+                <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-purple-600 transition-all duration-300"
+                    style={{ width: `${formData.totalHours > 0 ? (formData.hoursUsed / formData.totalHours) * 100 : 0}%` }}
+                  />
+                </div>
+                <span className="text-sm text-gray-600">
+                  {formData.totalHours > 0 ? Math.round((formData.hoursUsed / formData.totalHours) * 100) : 0}%
+                </span>
               </div>
             </div>
           </div>

@@ -44,10 +44,22 @@ export function getResourceHoursByTypeForValueStreamQuarter(projects, valueStrea
       new Date(p.startDate) <= new Date(quarterEnd)
   );
   const resourceTotals = {};
+  
   relevantProjects.forEach((project) => {
-    Object.entries(project.resources || {}).forEach(([type, { allocated }]) => {
-      resourceTotals[type] = (resourceTotals[type] || 0) + (allocated || 0);
-    });
+    // Add default PM hours (5% of total project hours)
+    const defaultPMHours = Math.round(project.totalHours * 0.05);
+    resourceTotals['rt-1'] = (resourceTotals['rt-1'] || 0) + defaultPMHours;
+
+    // Add other resource allocations
+    if (project.resources) {
+      Object.entries(project.resources).forEach(([type, { allocated }]) => {
+        // Skip PM hours as they're already added above
+        if (type !== 'rt-1') {
+          resourceTotals[type] = (resourceTotals[type] || 0) + (allocated || 0);
+        }
+      });
+    }
   });
+  
   return resourceTotals;
 } 

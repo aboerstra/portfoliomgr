@@ -652,11 +652,11 @@ const GanttChart = ({ projects, valueStreams, selectedValueStream, onAddProject,
                                         {project.name}
                                       </div>
                                       <div className="ml-auto text-white text-xs font-semibold pr-1">
-                                        {project.progress}%
+                                        {project.totalHours > 0 ? Math.round((project.hoursUsed / project.totalHours) * 100) : 0}%
                                       </div>
                                       {/* End Date Handle */}
                                       {projectTimelineData.isEndVisible && (
-                                        <div 
+                                        <div
                                           className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white hover:bg-opacity-20"
                                           onMouseDown={(e) => handleDragStart(e, project, 'end')}
                                         />
@@ -717,32 +717,6 @@ const GanttChart = ({ projects, valueStreams, selectedValueStream, onAddProject,
                     </div>
                   );
                 })}
-              </div>
-            </div>
-
-            {/* Legend */}
-            <div className="p-4 bg-gray-50 border-t border-gray-200">
-              <div className="flex items-center space-x-6 text-xs text-gray-600">
-                <div className="flex items-center space-x-2">
-                  <Diamond className="h-3 w-3 text-green-600 fill-green-600" />
-                  <span>Completed Milestone</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Diamond className="h-3 w-3 text-blue-600 fill-blue-600" />
-                  <span>In Progress Milestone</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Diamond className="h-3 w-3 text-gray-400 fill-gray-400" />
-                  <span>Planned Milestone</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-0.5 bg-red-500"></div>
-                  <span>Today</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Plus className="h-3 w-3 text-purple-600" />
-                  <span>Click "Add Project" to input your own data</span>
-                </div>
               </div>
             </div>
           </div>

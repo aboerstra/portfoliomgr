@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { quarters } from '../data/sampleData';
 import { getRocksForValueStreamQuarter, getMilestonesForValueStreamQuarter, getResourceHoursByTypeForValueStreamQuarter } from '../utils/quarterlyView';
 import { CheckCircle, PlayCircle, Clock, AlertTriangle, XCircle, PauseCircle } from 'lucide-react';
 
-// Mock rocks data (replace with real state management as needed)
+// Initial rocks data
 const initialRocks = [
   // Example:
   // { id: 'rock-1', valueStreamId: 'tech-platform', quarter: 1, year: 2025, name: 'Launch New API', status: 'in-progress' }
@@ -61,12 +61,20 @@ const priorityBadge = (priority) => {
   return <span className={badgeClass}>{priority}</span>;
 };
 
-function QuarterlyView({ valueStreams, projects: initialProjects, resourceTypes }) {
+function RocksPlanning({ valueStreams, projects: initialProjects, resourceTypes, onUpdateProjects }) {
   const [year, setYear] = useState(2025);
-  const [rocks, setRocks] = useState(initialRocks);
+  const [rocks, setRocks] = useState(() => {
+    const savedRocks = localStorage.getItem('rocks');
+    return savedRocks ? JSON.parse(savedRocks) : initialRocks;
+  });
   const [showPast, setShowPast] = useState(false);
   const [rockInputs, setRockInputs] = useState({});
   const [projects, setProjects] = useState(initialProjects);
+
+  // Save rocks to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('rocks', JSON.stringify(rocks));
+  }, [rocks]);
 
   const currentAndNext = getCurrentQuarterAndNext(year);
   const visibleQuarters = showPast
@@ -78,36 +86,45 @@ function QuarterlyView({ valueStreams, projects: initialProjects, resourceTypes 
     const key = `${valueStreamId}-${quarter}`;
     const name = (rockInputs[key] || '').trim();
     if (name) {
-      setRocks(prev => [
-        ...prev,
-        { id: `rock-${Date.now()}`, valueStreamId, quarter, year, name, status: 'not-started' }
-      ]);
+      const newRock = { 
+        id: `rock-${Date.now()}`, 
+        valueStreamId, 
+        quarter, 
+        year, 
+        name, 
+        status: 'not-started' 
+      };
+      setRocks(prev => [...prev, newRock]);
       setRockInputs(inputs => ({ ...inputs, [key]: '' }));
     }
   };
+
   const updateRockStatus = (rockId, status) => {
     setRocks(prev => prev.map(r => r.id === rockId ? { ...r, status } : r));
   };
+
   const deleteRock = (rockId) => {
     setRocks(prev => prev.filter(r => r.id !== rockId));
   };
 
   // Handler to link/unlink a milestone to rocks
   const updateMilestoneLinks = (projectId, milestoneId, newLinkedRockIds) => {
-    setProjects(prevProjects => prevProjects.map(p =>
+    const updatedProjects = projects.map(p =>
       p.id !== projectId ? p : {
         ...p,
         milestones: p.milestones.map(m =>
           m.id !== milestoneId ? m : { ...m, linkedRockIds: newLinkedRockIds }
         )
       }
-    ));
+    );
+    setProjects(updatedProjects);
+    onUpdateProjects(updatedProjects);
   };
 
   return (
     <div className="p-6">
       <div className="flex items-center mb-4">
-        <h2 className="text-2xl font-bold mr-6">Quarterly Rocks & Resources</h2>
+        <h2 className="text-2xl font-bold mr-6">Rocks Planning</h2>
         <label className="mr-2 font-medium">Year:</label>
         <select value={year} onChange={e => setYear(Number(e.target.value))} className="border rounded px-2 py-1">
           {[2025, 2026, 2027].map(y => <option key={y} value={y}>{y}</option>)}
@@ -209,4 +226,4 @@ function QuarterlyView({ valueStreams, projects: initialProjects, resourceTypes 
   );
 }
 
-export default QuarterlyView; 
+export default RocksPlanning; 

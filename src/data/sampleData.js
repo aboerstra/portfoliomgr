@@ -47,7 +47,9 @@ export const projects = [
       { id: 'ms-001', name: 'Architecture Design Complete', date: '2025-02-15', status: 'completed', linkedRockIds: [] },
       { id: 'ms-002', name: 'MVP Implementation', date: '2025-04-15', status: 'in-progress', linkedRockIds: [] },
       { id: 'ms-003', name: 'Production Deployment', date: '2025-06-15', status: 'planned', linkedRockIds: [] }
-    ]
+    ],
+    hoursUsed: 0,
+    totalHours: 160
   },
   {
     id: 'proj-002',
@@ -69,7 +71,9 @@ export const projects = [
       { id: 'ms-005', name: 'Design System Ready', date: '2025-04-01', status: 'planned', linkedRockIds: [] },
       { id: 'ms-006', name: 'Beta Release', date: '2025-07-01', status: 'planned', linkedRockIds: [] },
       { id: 'ms-007', name: 'App Store Launch', date: '2025-08-15', status: 'planned', linkedRockIds: [] }
-    ]
+    ],
+    hoursUsed: 0,
+    totalHours: 160
   },
   {
     id: 'proj-003',
@@ -90,7 +94,9 @@ export const projects = [
       { id: 'ms-008', name: 'Data Pipeline Setup', date: '2025-04-15', status: 'planned', linkedRockIds: [] },
       { id: 'ms-009', name: 'Dashboard MVP', date: '2025-06-30', status: 'planned', linkedRockIds: [] },
       { id: 'ms-010', name: 'Advanced Analytics', date: '2025-09-15', status: 'planned', linkedRockIds: [] }
-    ]
+    ],
+    hoursUsed: 0,
+    totalHours: 160
   },
   {
     id: 'proj-004',
@@ -111,7 +117,9 @@ export const projects = [
       { id: 'ms-011', name: 'Migration Plan Approved', date: '2025-02-01', status: 'completed', linkedRockIds: [] },
       { id: 'ms-012', name: 'Database Migration', date: '2025-03-31', status: 'in-progress', linkedRockIds: [] },
       { id: 'ms-013', name: 'Application Migration', date: '2025-05-15', status: 'planned', linkedRockIds: [] }
-    ]
+    ],
+    hoursUsed: 0,
+    totalHours: 160
   },
   {
     id: 'proj-005',
@@ -132,18 +140,44 @@ export const projects = [
       { id: 'ms-014', name: 'Requirements Gathering', date: '2025-04-15', status: 'planned', linkedRockIds: [] },
       { id: 'ms-015', name: 'Feature Development', date: '2025-06-15', status: 'planned', linkedRockIds: [] },
       { id: 'ms-016', name: 'User Testing', date: '2025-07-15', status: 'planned', linkedRockIds: [] }
-    ]
+    ],
+    hoursUsed: 0,
+    totalHours: 160
+  },
+  {
+    id: 'proj-1',
+    name: 'Sample Project 1',
+    description: 'This is a sample project',
+    startDate: '2024-01-01',
+    endDate: '2024-03-31',
+    valueStreamId: 'vs-1',
+    resourceTypeId: 'rt-1',
+    status: 'Not Started',
+    priority: 'Medium',
+    progress: 0,
+    hoursUsed: 0,
+    totalHours: 160,
+    resources: {},
+    milestones: [],
+    asanaUrl: '',
+    pmAllocation: 20
   }
 ];
 
 export const resourceTypes = [
-  { id: 'developers', name: 'Developers', hourlyRate: 100, capacity: 20, color: '#3B82F6' },
-  { id: 'designers', name: 'Designers', hourlyRate: 90, capacity: 8, color: '#EC4899' },
-  { id: 'architects', name: 'Architects', hourlyRate: 150, capacity: 4, color: '#8B5CF6' },
-  { id: 'devops', name: 'DevOps Engineers', hourlyRate: 120, capacity: 6, color: '#10B981' },
+  {
+    id: 'rt-1',
+    name: 'Project Manager',
+    hourlyRate: 150,
+    capacity: 1,
+    color: '#8B5CF6',
+    isDefault: true
+  },
+  { id: 'developers', name: 'Developers', hourlyRate: 100, capacity: 8, color: '#3B82F6' },
+  { id: 'designers', name: 'Designers', hourlyRate: 90, capacity: 3, color: '#EC4899' },
+  { id: 'qa', name: 'QA Engineers', hourlyRate: 85, capacity: 4, color: '#10B981' },
   { id: 'dataEngineers', name: 'Data Engineers', hourlyRate: 110, capacity: 4, color: '#F59E0B' },
-  { id: 'analysts', name: 'Business Analysts', hourlyRate: 80, capacity: 6, color: '#06B6D4' },
-  { id: 'pm', name: 'Project Managers', hourlyRate: 95, capacity: 5, color: '#84CC16' }
+  { id: 'analysts', name: 'Business Analysts', hourlyRate: 80, capacity: 6, color: '#06B6D4' }
 ];
 
 export const quarters = [
