@@ -517,62 +517,17 @@ function App() {
                     <File className="h-4 w-4 mr-2" /> Files
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  <DropdownMenuLabel>Switch Scenario</DropdownMenuLabel>
-                  <select
-                    className="w-full rounded bg-white px-2 py-1 text-gray-800 text-sm focus:outline-none border border-purple-200 mb-2"
-                    value={scenarioName}
-                    onChange={e => {
-                      const name = e.target.value;
-                      setScenarioName(name);
-                      const loaded = loadScenario(name);
-                      if (loaded) {
-                        setProjects(loaded.projects || []);
-                        setValueStreams(loaded.valueStreams || []);
-                        setResourceTypes(loaded.resourceTypes || []);
-                      }
-                    }}
-                  >
-                    {getSavedScenarioNames().map(name => (
-                      <option key={name} value={name}>{name}</option>
-                    ))}
-                    {!getSavedScenarioNames().includes(scenarioName) && (
-                      <option value={scenarioName}>{scenarioName}</option>
-                    )}
-                  </select>
+                <DropdownMenuContent className="!bg-white !text-black !border-2 !border-red-500 !p-4 !min-w-[200px]">
+                  <DropdownMenuItem className="!text-black hover:!bg-gray-100">
+                    <Download className="h-4 w-4 mr-2" /> Export Data
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="!text-black hover:!bg-gray-100">
+                    <Upload className="h-4 w-4 mr-2" /> Import Data
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuLabel>New Scenario</DropdownMenuLabel>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <input
-                      type="text"
-                      className="flex-1 rounded bg-white px-2 py-1 text-gray-800 text-sm border border-purple-200"
-                      placeholder="New scenario name"
-                      value={newScenarioName || ''}
-                      onChange={e => setNewScenarioName(e.target.value)}
-                    />
-                    <Button
-                      size="sm"
-                      className="bg-purple-600 hover:bg-purple-700 text-white"
-                      onClick={() => {
-                        if (newScenarioName && newScenarioName.trim()) {
-                          setScenarioName(newScenarioName.trim());
-                          saveScenario(newScenarioName.trim(), { projects, valueStreams, resourceTypes });
-                          saveLastScenarioName(newScenarioName.trim());
-                          setNewScenarioName('');
-                        }
-                      }}
-                    >
-                      Save As
-                    </Button>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={exportData}><Download className="h-4 w-4 mr-2" />Export</DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleExportPDF}><Download className="h-4 w-4 mr-2" />Export to PDF</DropdownMenuItem>
-                  <DropdownMenuItem onClick={triggerImport}><Upload className="h-4 w-4 mr-2" />Import</DropdownMenuItem>
-                  <DropdownMenuItem onClick={loadDemoData}><Database className="h-4 w-4 mr-2" />Demo Data</DropdownMenuItem>
-                  <DropdownMenuItem onClick={resetData} variant="destructive"><RotateCcw className="h-4 w-4 mr-2" />Reset</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setShowAsanaImport(true)}>Import from Asana</DropdownMenuItem>
+                  <DropdownMenuItem className="!text-black hover:!bg-gray-100">
+                    <RotateCcw className="h-4 w-4 mr-2" /> Reset Data
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </nav>
