@@ -11,6 +11,16 @@ import { format } from 'date-fns';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar.jsx';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.jsx';
 import { cn } from '@/lib/utils.js';
+import { Switch } from '@/components/ui/switch.jsx';
+
+// Add resource types definition
+const resourceTypes = [
+  { id: 'rt-1', name: 'Project Manager', color: '#8B5CF6' },
+  { id: 'rt-2', name: 'Developer', color: '#3B82F6' },
+  { id: 'rt-3', name: 'Designer', color: '#10B981' },
+  { id: 'rt-4', name: 'QA Engineer', color: '#F59E0B' },
+  { id: 'rt-5', name: 'Business Analyst', color: '#EC4899' }
+];
 
 const ProjectForm = ({ 
   isOpen, 
@@ -607,63 +617,221 @@ const ProjectForm = ({
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Hours Tracking</h3>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="estimatedHours">Estimated Hours</Label>
-                <Input
-                  id="estimatedHours"
-                  type="number"
-                  min="0"
-                  value={formData.estimatedHours}
-                  onChange={(e) => handleInputChange('estimatedHours', e.target.value)}
-                  placeholder="Enter estimated hours"
-                />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label>Resource Management</Label>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="simpleMode"
+                    checked={formData.simpleMode}
+                    onCheckedChange={(checked) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        simpleMode: checked,
+                        // Reset hours when switching modes
+                        estimatedHours: checked ? prev.estimatedHours : 0,
+                        pmHours: checked ? prev.pmHours : 0,
+                        totalHours: checked ? (prev.estimatedHours || 0) + (prev.pmHours || 0) : 0
+                      }));
+                    }}
+                  />
+                  <Label htmlFor="simpleMode" className="text-sm">Simple Mode</Label>
+                </div>
               </div>
-              
-              <div>
-                <Label htmlFor="pmHours">PM Hours</Label>
-                <Input
-                  id="pmHours"
-                  type="number"
-                  min="0"
-                  value={formData.autoPopulatePM ? 
-                    Math.ceil(formData.estimatedHours * (formData.pmAllocation / 100)) : 
-                    formData.pmHours}
-                  onChange={(e) => handleInputChange('pmHours', e.target.value)}
-                  readOnly={!formData.simpleMode || formData.autoPopulatePM}
-                  className={(!formData.simpleMode || formData.autoPopulatePM) ? "bg-gray-50 cursor-not-allowed" : ""}
-                  placeholder={formData.autoPopulatePM ? 
-                    "Calculated from estimated hours" : 
-                    "Enter PM hours"}
-                />
-              </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="pmAllocation">Project Manager Allocation (%)</Label>
-                <Input
-                  id="pmAllocation"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={formData.pmAllocation}
-                  onChange={(e) => handleInputChange('pmAllocation', parseInt(e.target.value) || 0)}
-                  placeholder="Enter PM allocation percentage"
-                />
-              </div>
-              
-              <div className="flex items-center space-x-2 mt-6">
-                <input
-                  type="checkbox"
-                  id="autoPopulatePM"
-                  checked={formData.autoPopulatePM}
-                  onChange={(e) => handleInputChange('autoPopulatePM', e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                />
-                <Label htmlFor="autoPopulatePM" className="text-sm text-gray-700">
-                  Auto-populate PM hours based on allocation
-                </Label>
+              {formData.simpleMode ? (
+                // Simple Mode: Just show total hours and PM allocation
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="estimatedHours">Estimated Hours</Label>
+                      <Input
+                        id="estimatedHours"
+                        type="number"
+                        min="0"
+                        value={formData.estimatedHours || ''}
+                        onChange={(e) => {
+                          const hours = parseInt(e.target.value) || 0;
+                          setFormData(prev => ({
+                            ...prev,
+                            estimatedHours: hours,
+                            totalHours: hours + (prev.pmHours || 0)
+                          }));
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="pmAllocation">PM Allocation (%)</Label>
+                      <Input
+                        id="pmAllocation"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={formData.pmAllocation || ''}
+                        onChange={(e) => {
+                          const allocation = parseInt(e.target.value) || 0;
+                          const pmHours = Math.ceil((formData.estimatedHours || 0) * (allocation / 100));
+                          setFormData(prev => ({
+                            ...prev,
+                            pmAllocation: allocation,
+                            pmHours: pmHours,
+                            totalHours: (prev.estimatedHours || 0) + pmHours
+                          }));
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="autoPopulatePM"
+                      checked={formData.autoPopulatePM}
+                      onChange={(e) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          autoPopulatePM: e.target.checked,
+                          pmHours: e.target.checked ? 
+                            Math.ceil((prev.estimatedHours || 0) * (prev.pmAllocation / 100)) : 
+                            prev.pmHours
+                        }));
+                      }}
+                      className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                    />
+                    <Label htmlFor="autoPopulatePM" className="text-sm text-gray-700">
+                      Auto-populate PM hours based on allocation
+                    </Label>
+                  </div>
+                </div>
+              ) : (
+                // Detailed Mode: Show resource type breakdown
+                <div className="space-y-4">
+                  {resourceTypes.map((type) => (
+                    <div key={type.id} className="grid grid-cols-3 gap-4 items-end">
+                      <div>
+                        <Label htmlFor={`${type.id}-required`} className="flex items-center space-x-2">
+                          <div 
+                            className="w-3 h-3 rounded-full" 
+                            style={{ backgroundColor: type.color }}
+                          />
+                          <span>{type.name}</span>
+                        </Label>
+                        <Input
+                          id={`${type.id}-required`}
+                          type="number"
+                          min="0"
+                          value={formData.resources[type.id]?.required || 0}
+                          onChange={(e) => {
+                            const required = parseInt(e.target.value) || 0;
+                            setFormData(prev => ({
+                              ...prev,
+                              resources: {
+                                ...prev.resources,
+                                [type.id]: {
+                                  ...prev.resources[type.id],
+                                  required,
+                                  hours: required * 8 * 5 * 4 // 8 hours/day * 5 days * 4 weeks
+                                }
+                              }
+                            }));
+                          }}
+                          placeholder="# Required"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`${type.id}-allocated`}>Allocated</Label>
+                        <Input
+                          id={`${type.id}-allocated`}
+                          type="number"
+                          min="0"
+                          value={formData.resources[type.id]?.allocated || 0}
+                          onChange={(e) => {
+                            const allocated = parseInt(e.target.value) || 0;
+                            setFormData(prev => ({
+                              ...prev,
+                              resources: {
+                                ...prev.resources,
+                                [type.id]: {
+                                  ...prev.resources[type.id],
+                                  allocated
+                                }
+                              }
+                            }));
+                          }}
+                          placeholder="# Allocated"
+                        />
+                      </div>
+                      <div>
+                        <Label>Hours Required</Label>
+                        <Input
+                          id={`${type.id}-hours`}
+                          type="number"
+                          min="0"
+                          value={formData.resources[type.id]?.hours || 0}
+                          onChange={(e) => {
+                            const hours = parseInt(e.target.value) || 0;
+                            setFormData(prev => ({
+                              ...prev,
+                              resources: {
+                                ...prev.resources,
+                                [type.id]: {
+                                  ...prev.resources[type.id],
+                                  hours
+                                }
+                              }
+                            }));
+                          }}
+                          placeholder="Hours Required"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Hours and Progress Summary - Always Visible */}
+              <div className="mt-4 pt-4 border-t space-y-4">
+                <div className="flex justify-between items-center">
+                  <Label>Total Hours</Label>
+                  <div className="text-lg font-semibold">
+                    {formData.simpleMode 
+                      ? formData.totalHours || 0
+                      : Object.values(formData.resources || {})
+                          .reduce((sum, resource) => sum + (resource.hours || 0), 0)
+                    } hours
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="hoursUsed">Hours Used</Label>
+                    <Input
+                      id="hoursUsed"
+                      type="number"
+                      min="0"
+                      value={formData.hoursUsed || 0}
+                      onChange={(e) => {
+                        const hoursUsed = parseInt(e.target.value) || 0;
+                        setFormData(prev => ({
+                          ...prev,
+                          hoursUsed
+                        }));
+                      }}
+                      placeholder="Enter hours used"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Progress</Label>
+                    <div className="text-lg font-semibold">
+                      {(() => {
+                        const totalHours = formData.simpleMode 
+                          ? formData.totalHours || 0
+                          : Object.values(formData.resources || {})
+                              .reduce((sum, resource) => sum + (resource.hours || 0), 0);
+                        const hoursUsed = formData.hoursUsed || 0;
+                        return totalHours > 0 ? Math.min(Math.round((hoursUsed / totalHours) * 100), 100) : 0;
+                      })()}%
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
