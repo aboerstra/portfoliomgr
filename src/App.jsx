@@ -30,7 +30,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Button } from '@/components/ui/button.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
-import { Calendar, BarChart3, Users, Settings, Download, Upload, RotateCcw, Database, Save, ChevronLeft, ChevronRight, File, Trash2, Pencil, HelpCircle } from 'lucide-react'
+import { Calendar, BarChart3, Users, Settings, Download, Upload, RotateCcw, Database, Save, ChevronLeft, ChevronRight, File, Trash2, Pencil, HelpCircle, Plus } from 'lucide-react'
 import { HashRouter as Router, Routes, Route } from 'react-router-dom'
 import fayeLogo from './assets/faye-logo-white.png'
 import ValueStreamSidebar from './components/ValueStreamSidebar.jsx'
@@ -194,6 +194,7 @@ function PortfolioView() {
     return 'Client Name';
   });
   const [isEditingClient, setIsEditingClient] = useState(false);
+  const [showFilesModal, setShowFilesModal] = useState(false);
 
   // Helper function to save data
   const saveData = (dataToSave = null) => {
@@ -779,40 +780,40 @@ function PortfolioView() {
                 onClick={() => setCurrentView('portfolio')}
                 className="text-white hover:text-purple-200"
               >
-                <BarChart3 className="h-4 w-4 mr-2" />
-                Portfolio View
+                <Calendar className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Portfolio</span>
               </Button>
               <Button 
                 variant={currentView === 'resource-planning' ? 'secondary' : 'ghost'}
                 onClick={() => setCurrentView('resource-planning')}
                 className="text-white hover:text-purple-200"
               >
-                <Users className="h-4 w-4 mr-2" />
-                Resource Planning
+                <Users className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Resources</span>
               </Button>
               <Button 
                 variant={currentView === 'rocks-planning' ? 'secondary' : 'ghost'}
                 onClick={() => setCurrentView('rocks-planning')}
                 className="text-white hover:text-purple-200"
               >
-                <Calendar className="h-4 w-4 mr-2" />
-                Rocks Planning
+                <BarChart3 className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Rocks</span>
               </Button>
               <Button 
                 variant={currentView === 'settings' ? 'secondary' : 'ghost'}
                 onClick={() => setCurrentView('settings')}
                 className="text-white hover:text-purple-200"
               >
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
+                <Settings className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Settings</span>
               </Button>
               <Button 
                 variant={currentView === 'files' ? 'secondary' : 'ghost'}
-                onClick={() => setCurrentView('files')}
+                onClick={() => setShowFilesModal(true)}
                 className="text-white hover:text-purple-200"
               >
-                <File className="h-4 w-4 mr-2" />
-                Files
+                <File className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Files</span>
               </Button>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -821,8 +822,8 @@ function PortfolioView() {
                     onClick={() => setCurrentView('help')}
                     className="text-white"
                   >
-                    <HelpCircle className="h-4 w-4 mr-2" />
-                    Help
+                    <HelpCircle className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Help</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -832,44 +833,13 @@ function PortfolioView() {
             </nav>
             {/* Import/Export Buttons */}
             <div className="flex items-center space-x-2">
-              <input
-                type="file"
-                accept=".json"
-                onChange={handleFileChange}
-                id="fileInput"
-                style={{ display: 'none' }}
-              />
-              <Button
-                variant="ghost"
-                onClick={() => setShowAsanaImport(true)}
-                className="text-white hover:text-purple-200"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Import from Asana
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => document.getElementById('fileInput').click()}
-                className="text-white hover:text-purple-200"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Import JSON
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={exportData}
-                className="text-white hover:text-purple-200"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
               <Button
                 variant="ghost"
                 onClick={resetData}
                 className="text-white hover:text-red-200"
               >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Reset
+                <Trash2 className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Reset</span>
               </Button>
               <Dialog>
                 <DialogTrigger asChild>
@@ -877,8 +847,8 @@ function PortfolioView() {
                     variant="ghost"
                     className="text-white hover:text-purple-200"
                   >
-                    <Save className="h-4 w-4 mr-2" />
-                    Scenarios
+                    <Save className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Scenarios</span>
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
@@ -946,16 +916,6 @@ function PortfolioView() {
             <div className="h-full">
               <div className="mb-4">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-800">Project Portfolio</h2>
-                    <p className="text-gray-600">
-                      {selectedValueStream 
-                        ? `Showing projects for ${valueStreams.find(s => s.id === selectedValueStream)?.name}`
-                        : 'Showing all projects across value streams'
-                      }
-                    </p>
-                  </div>
-                  
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-4 bg-gray-50 p-3 rounded-lg border">
                       <div className="flex items-center space-x-2">
@@ -1062,19 +1022,6 @@ function PortfolioView() {
             />
           )}
 
-          {currentView === 'files' && (
-            <FilesPage
-              onExport={exportData}
-              onImport={handleImportData}
-              onReset={resetData}
-              isExporting={false}
-              isImporting={isImporting}
-              isResetting={false}
-              error={error}
-              fileInputRef={null}
-            />
-          )}
-
           {currentView === 'help' && (
             <div className="p-6">
               <HelpPage />
@@ -1082,6 +1029,97 @@ function PortfolioView() {
           )}
         </div>
       </div>
+
+      {/* Files Modal */}
+      <Dialog open={showFilesModal} onOpenChange={setShowFilesModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>File Management</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Import Data</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Import from Asana</h3>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowAsanaImport(true)}
+                      className="w-full"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Import from Asana
+                    </Button>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Import JSON File</h3>
+                    <Button
+                      variant="outline"
+                      onClick={() => document.getElementById('fileInput').click()}
+                      className="w-full"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Import JSON
+                    </Button>
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleFileChange}
+                      id="fileInput"
+                      style={{ display: 'none' }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Export Data</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Export to JSON</h3>
+                    <Button
+                      variant="outline"
+                      onClick={exportData}
+                      className="w-full"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Export JSON
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            <Card className="border-red-200">
+              <CardHeader>
+                <CardTitle className="text-red-600">Danger Zone</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Reset All Data</h3>
+                  <p className="text-sm text-gray-500 mb-4">This will permanently delete all your data. This action cannot be undone.</p>
+                  <Button
+                    variant="outline"
+                    onClick={resetData}
+                    className="w-full text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Reset All Data
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            {error && (
+              <div className="bg-red-50 text-red-700 p-4 rounded-lg">
+                {error}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Project Form Modal */}
       <ProjectForm
