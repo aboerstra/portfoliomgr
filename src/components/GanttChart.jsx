@@ -10,6 +10,7 @@ import { addMonths, subMonths, startOfQuarter, endOfQuarter, startOfYear, endOfY
 import { createPortal } from 'react-dom';
 import { resourceTypes as staticResourceTypes } from '../data/sampleData';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import ResourceChart from './ResourceChart.jsx';
 
 // Move StatusIconWithTooltip to the top level of the file
 const StatusIconWithTooltip = ({ tooltip, children }) => {
@@ -571,6 +572,10 @@ const GanttChart = ({ projects, valueStreams, selectedValueStream, onAddProject,
                     </div>
                   </div>
                 ))}
+              </div>
+              {/* Resource Chart: align with months */}
+              <div className="w-full" style={{ marginTop: '3px' }}>
+                <ResourceChart projects={projects} startDate={timelineData.startDate} endDate={timelineData.endDate} />
               </div>
             </div>
           </div>
