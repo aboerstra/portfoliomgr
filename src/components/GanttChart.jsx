@@ -11,6 +11,7 @@ import { createPortal } from 'react-dom';
 import { resourceTypes as staticResourceTypes } from '../data/sampleData';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import ResourceChart from './ResourceChart.jsx';
+import { Switch } from '@/components/ui/switch.jsx';
 
 // Move StatusIconWithTooltip to the top level of the file
 const StatusIconWithTooltip = ({ tooltip, children }) => {
@@ -143,6 +144,7 @@ const GanttChart = ({ projects, valueStreams, selectedValueStream, onAddProject,
   const [dragOverProjectId, setDragOverProjectId] = useState(null);
   const [dragOverValueStreamId, setDragOverValueStreamId] = useState(null);
   const [openPriorityPopover, setOpenPriorityPopover] = useState(null);
+  const [hideOutOfViewProjects, setHideOutOfViewProjects] = useState(false);
 
   const monthOptions = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -299,15 +301,20 @@ const GanttChart = ({ projects, valueStreams, selectedValueStream, onAddProject,
   // Group projects by value stream
   const projectsByValueStream = useMemo(() => {
     const grouped = {};
-    // Always include all value streams, even if they have no projects
     valueStreams.forEach(stream => {
-      const streamProjects = projects.filter(project => project.valueStreamId === stream.id);
+      let streamProjects = projects.filter(project => project.valueStreamId === stream.id);
+      if (hideOutOfViewProjects) {
+        streamProjects = streamProjects.filter(project => {
+          const projectStart = new Date(project.startDate);
+          const projectEnd = new Date(project.endDate);
+          return projectEnd >= timelineData.startDate && projectStart <= timelineData.endDate;
+        });
+      }
       grouped[stream.id] = {
         ...stream,
         projects: streamProjects
       };
     });
-    // If a value stream is selected, only show that value stream's projects
     if (selectedValueStream) {
       const selectedStream = valueStreams.find(s => s.id === selectedValueStream);
       if (selectedStream) {
@@ -317,7 +324,7 @@ const GanttChart = ({ projects, valueStreams, selectedValueStream, onAddProject,
       }
     }
     return grouped;
-  }, [projects, valueStreams, selectedValueStream]);
+  }, [projects, valueStreams, selectedValueStream, hideOutOfViewProjects, timelineData.startDate, timelineData.endDate]);
 
   // Calculate project position and width on timeline
   const getProjectTimelineData = (project) => {
@@ -476,6 +483,17 @@ const GanttChart = ({ projects, valueStreams, selectedValueStream, onAddProject,
                       ))}
                     </SelectContent>
                   </Select>
+                  {/* Hide Out-of-View Projects Toggle - moved to the right of month selector */}
+                  <div className="flex items-center ml-4">
+                    <span className={`text-xs select-none ${!hideOutOfViewProjects ? 'text-purple-700 font-semibold' : 'text-gray-600'}`}>Show All</span>
+                    <Switch
+                      checked={hideOutOfViewProjects}
+                      onCheckedChange={setHideOutOfViewProjects}
+                      id="hide-out-of-view-projects"
+                      className="mx-2"
+                    />
+                    <span className={`text-xs select-none ${hideOutOfViewProjects ? 'text-purple-700 font-semibold' : 'text-gray-600'}`}>Current Projects Only</span>
+                  </div>
                   {selectedValueStream && (
                     <Badge variant="secondary">
                       {valueStreams.find(s => s.id === selectedValueStream)?.name}
