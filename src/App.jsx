@@ -68,67 +68,79 @@ function parseAsanaTasks(asanaJson, valueStreamId) {
   };
 
   // First, find all milestone tasks
-  const milestoneTasks = asanaJson.data.filter(task => {
-    const taskType = getCustomField(task, 'Task Type');
-    return taskType?.toLowerCase() === 'milestone';
-  });
+  const milestoneTasks = asanaJson.data.filter(task => 
+    task.resource_subtype === 'milestone'
+  );
 
-  // Then process all tasks, creating milestones and projects
-  const importedProjects = asanaJson.data.map(task => {
-    const taskType = getCustomField(task, 'Task Type');
-    const isMilestone = taskType?.toLowerCase() === 'milestone';
+  // Create a map of milestone tasks for quick lookup
+  const milestoneMap = new Map(milestoneTasks.map(task => [task.gid, task]));
 
-    // Fallbacks for start/end dates
-    const startDate = task.start_on || getCustomField(task, 'Start Date') || null;
-    const endDate = task.due_on || null;
+  // Then process all tasks, creating projects and adding milestones
+  const importedProjects = asanaJson.data
+    .filter(task => task.resource_subtype !== 'milestone')
+    .map(task => {
+      // Fallbacks for start/end dates
+      const startDate = task.start_on || getCustomField(task, 'Start Date') || null;
+      const endDate = task.due_on || null;
 
-    // Map status with fallbacks
-    let status = 'planned';
-    if (task.completed) {
-      status = 'completed';
-    } else {
-      const jiraStatus = getCustomField(task, 'Jira status');
-      if (jiraStatus) {
-        status = jiraStatus.toLowerCase();
+      // Map status with fallbacks
+      let status = 'planned';
+      if (task.completed) {
+        status = 'completed';
+      } else {
+        const jiraStatus = getCustomField(task, 'Jira status');
+        if (jiraStatus) {
+          status = jiraStatus.toLowerCase();
+        }
       }
-    }
 
-    // Map priority with fallbacks
-    let priority = 'medium';
-    const jiraPriority = getCustomField(task, 'Jira priority');
-    if (jiraPriority) {
-      priority = jiraPriority.toLowerCase();
-    }
+      // Map priority with fallbacks
+      let priority = 'medium';
+      const jiraPriority = getCustomField(task, 'Jira priority');
+      if (jiraPriority) {
+        priority = jiraPriority.toLowerCase();
+      }
 
-    // Create the base project object
-    const project = {
-      id: `asana-${task.gid}`,
-      name: task.name || 'Untitled',
-      description: task.notes || '',
-      valueStreamId,
-      startDate,
-      endDate,
-      status,
-      priority,
-      progress: 0,
-      resources: {},
-      milestones: [],
-      asanaUrl: task.permalink_url || '',
-    };
-
-    // If this is a milestone task, add it as a milestone to the project
-    if (isMilestone) {
-      project.milestones.push({
-        id: `milestone-${task.gid}`,
-        name: task.name || 'Untitled Milestone',
-        date: endDate || startDate,
+      // Create the base project object
+      const project = {
+        id: `asana-${task.gid}`,
+        name: task.name || 'Untitled',
         description: task.notes || '',
-        status: status,
-      });
-    }
+        valueStreamId,
+        startDate,
+        endDate,
+        status,
+        priority,
+        progress: 0,
+        resources: {},
+        milestones: [],
+        asanaUrl: task.permalink_url || '',
+      };
 
-    return project;
-  });
+      // Find any milestone tasks that are subtasks of this task
+      const subtaskMilestones = asanaJson.data.filter(subtask => 
+        subtask.resource_subtype === 'milestone' && 
+        subtask.parent?.gid === task.gid
+      );
+
+      // Add milestones to the project
+      subtaskMilestones.forEach(milestoneTask => {
+        const milestoneDate = milestoneTask.due_on || 
+                            getCustomField(milestoneTask, 'Start Date') || 
+                            milestoneTask.start_on;
+        
+        project.milestones.push({
+          id: `milestone-${milestoneTask.gid}`,
+          name: milestoneTask.name || 'Untitled Milestone',
+          date: milestoneDate,
+          description: milestoneTask.notes || '',
+          status: milestoneTask.completed ? 'completed' : 'planned',
+          asanaUrl: milestoneTask.permalink_url || '',
+        });
+      });
+
+      return project;
+    });
 
   return importedProjects;
 }
@@ -550,8 +562,33 @@ function PortfolioView() {
           return;
         }
 
-        // Add imported projects to existing projects
-        setProjects(prev => [...prev, ...importedProjects]);
+        // Check for duplicates
+        const duplicateIds = importedProjects
+          .map(p => p.id)
+          .filter(id => projects.some(p => p.id === id));
+
+        if (duplicateIds.length > 0) {
+          const shouldReplace = window.confirm(
+            `Found ${duplicateIds.length} existing tasks with the same IDs. Would you like to replace them? (Click OK to replace, Cancel to skip duplicates)`
+          );
+
+          if (shouldReplace) {
+            // Replace existing projects and add new ones
+            setProjects(prev => {
+              const filtered = prev.filter(p => !duplicateIds.includes(p.id));
+              return [...filtered, ...importedProjects];
+            });
+          } else {
+            // Skip duplicates and only add new projects
+            setProjects(prev => {
+              const newProjects = importedProjects.filter(p => !duplicateIds.includes(p.id));
+              return [...prev, ...newProjects];
+            });
+          }
+        } else {
+          // No duplicates, just add all projects
+          setProjects(prev => [...prev, ...importedProjects]);
+        }
         
         // Show success message
         alert(`Successfully imported ${importedProjects.length} tasks from Asana!`);
@@ -744,11 +781,19 @@ function PortfolioView() {
               />
               <Button
                 variant="ghost"
+                onClick={() => setShowAsanaImport(true)}
+                className="text-white hover:text-purple-200"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Import from Asana
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={() => document.getElementById('fileInput').click()}
                 className="text-white hover:text-purple-200"
               >
                 <Upload className="h-4 w-4 mr-2" />
-                Import
+                Import JSON
               </Button>
               <Button
                 variant="ghost"
