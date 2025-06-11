@@ -30,7 +30,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Button } from '@/components/ui/button.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
-import { Calendar, BarChart3, Users, Settings, Download, Upload, RotateCcw, Database, Save, ChevronLeft, ChevronRight, File, Trash2 } from 'lucide-react'
+import { Calendar, BarChart3, Users, Settings, Download, Upload, RotateCcw, Database, Save, ChevronLeft, ChevronRight, File, Trash2, Pencil, HelpCircle } from 'lucide-react'
 import { HashRouter as Router, Routes, Route } from 'react-router-dom'
 import fayeLogo from './assets/faye-logo-white.png'
 import ValueStreamSidebar from './components/ValueStreamSidebar.jsx'
@@ -48,6 +48,9 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { calculateResourceRequirementsForRange } from './utils/resourceCalculator';
+import { Input } from '@/components/ui/input';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import HelpPage from '@/components/HelpPage';
 
 function parseAsanaTasks(asanaJson, valueStreamId) {
   if (!asanaJson || !Array.isArray(asanaJson.data)) {
@@ -178,51 +181,33 @@ function PortfolioView() {
   const [isImporting, setIsImporting] = useState(false);
   const [error, setError] = useState(null);
   const [selectedRange, setSelectedRange] = useState('currentQuarter');
+  const [clientName, setClientName] = useState(() => {
+    const savedData = localStorage.getItem('portfolioData');
+    if (savedData) {
+      try {
+        const data = JSON.parse(savedData);
+        return data.clientName || 'Client Name';
+      } catch (e) {
+        return 'Client Name';
+      }
+    }
+    return 'Client Name';
+  });
+  const [isEditingClient, setIsEditingClient] = useState(false);
 
   // Helper function to save data
-  const saveData = (data) => {
+  const saveData = () => {
     try {
-      console.log('Starting saveData function...');
-      console.log('Data to save:', {
-        projects: data.projects.length,
-        valueStreams: data.valueStreams.length,
-        resourceTypes: data.resourceTypes.length
-      });
-      
-      const dataString = JSON.stringify(data);
-      console.log('Data stringified, length:', dataString.length);
-      
-      // Try localStorage first
-      console.log('Attempting to save to localStorage...');
-      try {
-        localStorage.setItem('portfolioData', dataString);
-        const verifyData = localStorage.getItem('portfolioData');
-        if (!verifyData) {
-          throw new Error('Data not found after saving to localStorage');
-        }
-        console.log('Successfully saved and verified in localStorage');
-        return true;
-      } catch (localError) {
-        console.error('localStorage error:', localError);
-        
-        // Try sessionStorage as fallback
-        console.log('Attempting to save to sessionStorage...');
-        try {
-          sessionStorage.setItem('portfolioData', dataString);
-          const verifyData = sessionStorage.getItem('portfolioData');
-          if (!verifyData) {
-            throw new Error('Data not found after saving to sessionStorage');
-          }
-          console.log('Successfully saved and verified in sessionStorage');
-          return true;
-        } catch (sessionError) {
-          console.error('sessionStorage error:', sessionError);
-          throw new Error('Failed to save to both localStorage and sessionStorage');
-        }
-      }
+      const data = {
+        projects,
+        valueStreams,
+        resourceTypes,
+        clientName,
+      };
+      localStorage.setItem('portfolioData', JSON.stringify(data));
+      console.log('Data saved successfully:', { clientName });
     } catch (error) {
-      console.error('Error in saveData:', error);
-      return false;
+      console.error('Error saving data:', error);
     }
   };
 
@@ -722,12 +707,44 @@ function PortfolioView() {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
-      <header className="bg-gradient-to-r from-purple-600 to-purple-800 text-white shadow-lg">
+      <header className="bg-[#59168B] text-white p-4">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <img src={fayeLogo} alt="Faye" className="h-8" />
-              <h1 className="text-2xl font-bold">Portfolio Manager</h1>
+              <img src={fayeLogo} alt="Faye Logo" className="h-8" />
+              <div className="flex flex-col">
+                <span className="text-sm text-purple-200">Portfolio Planner, prepared for</span>
+                <div className="flex items-center space-x-2">
+                  {isEditingClient ? (
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        value={clientName}
+                        onChange={(e) => setClientName(e.target.value)}
+                        className="h-8 w-64 bg-purple-800 text-white border-purple-700"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            setIsEditingClient(false);
+                            saveData();
+                          }
+                        }}
+                        onBlur={() => {
+                          setIsEditingClient(false);
+                          saveData();
+                        }}
+                        autoFocus
+                      />
+                    </div>
+                  ) : (
+                    <div 
+                      className="flex items-center space-x-2 cursor-pointer hover:text-purple-200"
+                      onClick={() => setIsEditingClient(true)}
+                    >
+                      <h1 className="text-xl font-bold">{clientName}</h1>
+                      <Pencil className="h-4 w-4" />
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
             {/* Main Navigation Tabs */}
             <nav className="flex items-center space-x-2 bg-white/10 rounded-lg px-2 py-1">
@@ -771,6 +788,21 @@ function PortfolioView() {
                 <File className="h-4 w-4 mr-2" />
                 Files
               </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant={currentView === 'help' ? 'secondary' : 'ghost'}
+                    onClick={() => setCurrentView('help')}
+                    className="text-white"
+                  >
+                    <HelpCircle className="h-4 w-4 mr-2" />
+                    Help
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>View help documentation</p>
+                </TooltipContent>
+              </Tooltip>
             </nav>
             {/* Import/Export Buttons */}
             <div className="flex items-center space-x-2">
@@ -1015,6 +1047,12 @@ function PortfolioView() {
               error={error}
               fileInputRef={null}
             />
+          )}
+
+          {currentView === 'help' && (
+            <div className="p-6">
+              <HelpPage />
+            </div>
           )}
         </div>
       </div>
