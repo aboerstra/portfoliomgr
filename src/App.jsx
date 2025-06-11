@@ -196,18 +196,36 @@ function PortfolioView() {
   const [isEditingClient, setIsEditingClient] = useState(false);
 
   // Helper function to save data
-  const saveData = () => {
+  const saveData = (dataToSave = null) => {
     try {
-      const data = {
+      const data = dataToSave || {
         projects,
         valueStreams,
         resourceTypes,
         clientName,
       };
-      localStorage.setItem('portfolioData', JSON.stringify(data));
-      console.log('Data saved successfully:', { clientName });
+      
+      // Try localStorage first
+      try {
+        localStorage.setItem('portfolioData', JSON.stringify(data));
+        console.log('Data saved successfully to localStorage');
+        return true;
+      } catch (localError) {
+        console.warn('localStorage failed, trying sessionStorage:', localError);
+        
+        // Fallback to sessionStorage
+        try {
+          sessionStorage.setItem('portfolioData', JSON.stringify(data));
+          console.log('Data saved successfully to sessionStorage');
+          return true;
+        } catch (sessionError) {
+          console.error('Both storage methods failed:', sessionError);
+          return false;
+        }
+      }
     } catch (error) {
       console.error('Error saving data:', error);
+      return false;
     }
   };
 
@@ -369,6 +387,7 @@ function PortfolioView() {
       projects,
       valueStreams,
       resourceTypes,
+      clientName,
       exportDate: new Date().toISOString(),
       version: '1.0'
     }
@@ -471,28 +490,35 @@ function PortfolioView() {
           hourlyRate: Number(rt.hourlyRate || 0),
           capacity: Number(rt.capacity || 1),
           color: String(rt.color || '#3B82F6')
-        }))
+        })),
+        clientName: data.clientName || clientName // Use existing clientName if not in imported data
       };
       
-      console.log('Data cleaned and normalized. Proceeding with save...');
+      console.log('Data cleaned and normalized. Proceeding with state update...');
       
-      // Save data using the helper function
-      const saveSuccess = saveData(cleanData);
-      if (!saveSuccess) {
-        throw new Error('Failed to save data to any storage. Please check your browser settings.');
-      }
-      
-      // Update state with imported data
-      console.log('Updating application state...');
+      // Update state with imported data first
       setProjects(cleanData.projects);
       setValueStreams(cleanData.valueStreams);
       setResourceTypes(cleanData.resourceTypes);
       console.log('State updated with imported data');
       
+      // Then try to save to storage
+      try {
+        localStorage.setItem('portfolioData', JSON.stringify(cleanData));
+        console.log('Data saved to localStorage');
+      } catch (localError) {
+        console.warn('localStorage failed, trying sessionStorage:', localError);
+        try {
+          sessionStorage.setItem('portfolioData', JSON.stringify(cleanData));
+          console.log('Data saved to sessionStorage');
+        } catch (sessionError) {
+          console.warn('Both storage methods failed, but data is loaded in memory:', sessionError);
+        }
+      }
+      
       // Show success message
       alert(`Successfully imported ${cleanData.projects.length} projects, ${cleanData.valueStreams.length} value streams, and ${cleanData.resourceTypes.length} resource types!`);
       
-      // No need to reload the page anymore
       console.log('Import completed successfully');
     } catch (err) {
       console.error('Import failed:', err);
