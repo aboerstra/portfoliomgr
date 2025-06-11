@@ -30,7 +30,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Button } from '@/components/ui/button.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
-import { Calendar, BarChart3, Users, Settings, Download, Upload, RotateCcw, Database, Save, ChevronLeft, ChevronRight, File } from 'lucide-react'
+import { Calendar, BarChart3, Users, Settings, Download, Upload, RotateCcw, Database, Save, ChevronLeft, ChevronRight, File, Trash2 } from 'lucide-react'
 import { HashRouter as Router, Routes, Route } from 'react-router-dom'
 import fayeLogo from './assets/faye-logo-white.png'
 import ValueStreamSidebar from './components/ValueStreamSidebar.jsx'
@@ -802,6 +802,14 @@ function PortfolioView() {
               >
                 <Download className="h-4 w-4 mr-2" />
                 Export
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={resetData}
+                className="text-white hover:text-red-200"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Reset
               </Button>
             </div>
           </div>

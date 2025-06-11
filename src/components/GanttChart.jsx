@@ -523,15 +523,6 @@ const GanttChart = ({ projects, valueStreams, selectedValueStream, onAddProject,
                     </Select>
                   </div>
                 </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={toggleAllValueStreams}
-                  className="h-8"
-                >
-                  {expandedStreams.size === valueStreams.length ? 'Collapse All' : 'Expand All'}
-                </Button>
               </div>
             </div>
           </CardHeader>
