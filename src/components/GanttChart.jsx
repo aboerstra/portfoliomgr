@@ -498,7 +498,7 @@ const GanttChart = ({ projects, valueStreams, selectedValueStream, onAddProject,
         <div className="flex-1 overflow-auto">
           <div className="relative">
             {/* Value Stream Groups */}
-            <div className="w-[calc(100%-400px)]">
+            <div className="w-full">
               {Object.values(projectsByValueStream).map((valueStream) => {
                 const isExpanded = expandedStreams.has(valueStream.id);
                 const projectCount = valueStream.projects.length;
