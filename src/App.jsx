@@ -40,6 +40,8 @@ import ResourcePlanningPanel from './components/ResourcePlanningPanel.jsx'
 import SettingsPanel from './components/SettingsPanel.jsx'
 import FilesPage from './pages/FilesPage.jsx'
 import RocksPlanning from './components/RocksPlanning.jsx'
+import ScenarioManager from './components/ScenarioManager.jsx'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import './App.css'
 import { projects as initialProjects, valueStreams as initialValueStreams, resourceTypes as initialResourceTypes } from './data/sampleData.js';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
@@ -811,6 +813,30 @@ function PortfolioView() {
                 <Trash2 className="h-4 w-4 mr-2" />
                 Reset
               </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:text-purple-200"
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    Scenarios
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Scenario Management</DialogTitle>
+                  </DialogHeader>
+                  <ScenarioManager
+                    currentData={{ projects, valueStreams, resourceTypes }}
+                    onLoadScenario={(data) => {
+                      setProjects(data.projects);
+                      setValueStreams(data.valueStreams);
+                      setResourceTypes(data.resourceTypes);
+                    }}
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>

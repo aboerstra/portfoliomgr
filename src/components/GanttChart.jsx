@@ -5,9 +5,11 @@ import { Progress } from '@/components/ui/progress.jsx';
 import { Button } from '@/components/ui/button.jsx';
 import { Calendar, Diamond, Users, Plus, ChevronDown, ChevronRight, ChevronLeft, Pencil, Trash2, GripVertical, CheckCircle, PlayCircle, Clock, AlertTriangle, XCircle, PauseCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.jsx';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { addMonths, subMonths, startOfQuarter, endOfQuarter, startOfYear, endOfYear, format, setMonth } from 'date-fns';
 import { createPortal } from 'react-dom';
 import { resourceTypes as staticResourceTypes } from '../data/sampleData';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 // Move StatusIconWithTooltip to the top level of the file
 const StatusIconWithTooltip = ({ tooltip, children }) => {
@@ -139,6 +141,7 @@ const GanttChart = ({ projects, valueStreams, selectedValueStream, onAddProject,
   const [draggedProjectId, setDraggedProjectId] = useState(null);
   const [dragOverProjectId, setDragOverProjectId] = useState(null);
   const [dragOverValueStreamId, setDragOverValueStreamId] = useState(null);
+  const [openPriorityPopover, setOpenPriorityPopover] = useState(null);
 
   const monthOptions = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -663,7 +666,6 @@ const GanttChart = ({ projects, valueStreams, selectedValueStream, onAddProject,
                                           className="p-1 hover:bg-gray-100 rounded-full cursor-grab"
                                           title="Reorder Project"
                                           tabIndex={-1}
-                                          style={{ pointerEvents: 'none' }}
                                         >
                                           <GripVertical className="w-4 h-4 text-gray-400" />
                                         </button>
@@ -675,11 +677,11 @@ const GanttChart = ({ projects, valueStreams, selectedValueStream, onAddProject,
                                       <div className="flex mt-1 text-xs text-gray-500 truncate">
                                         <div className="flex-shrink-0 flex flex-col items-start ml-7" style={{ minWidth: '4.5rem' }}>
                                           <Badge 
-                                            className={`text-xs w-fit 
-                                              ${project.priority === 'high' ? 'bg-red-500 text-white' : ''}
-                                              ${project.priority === 'medium' ? 'bg-yellow-400 text-gray-900' : ''}
-                                              ${project.priority === 'low' ? 'bg-green-500 text-white' : ''}
-                                            `}
+                                            className={`text-xs w-fit
+                                            ${project.priority === 'high' ? 'bg-red-500 text-white' : ''}
+                                            ${project.priority === 'medium' ? 'bg-yellow-400 text-gray-900' : ''}
+                                            ${project.priority === 'low' ? 'bg-green-500 text-white' : ''}
+                                          `}
                                           >
                                             {project.priority}
                                           </Badge>
