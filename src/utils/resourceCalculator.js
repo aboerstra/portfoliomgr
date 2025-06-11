@@ -240,3 +240,185 @@ export class ResourceImpactCalculator {
   }
 }
 
+/**
+ * Calculate the average hours per month for a selected quarter or the current quarter.
+ * @param {Array} projects - Array of project objects
+ * @param {string} quarter - Quarter in format 'YYYY-Q' (e.g., '2023-Q1'). If not provided, uses the current quarter.
+ * @returns {Object} Object containing the average hours per month for the quarter.
+ */
+export function calculateQuarterlyResourceRequirements(projects, quarter) {
+  // Determine the start and end dates for the quarter
+  let startDate, endDate;
+  if (quarter) {
+    const [year, q] = quarter.split('-Q');
+    const month = (parseInt(q) - 1) * 3;
+    startDate = new Date(parseInt(year), month, 1);
+    endDate = new Date(parseInt(year), month + 3, 0);
+  } else {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentQuarter = Math.floor(currentMonth / 3);
+    startDate = new Date(now.getFullYear(), currentQuarter * 3, 1);
+    endDate = new Date(now.getFullYear(), (currentQuarter + 1) * 3, 0);
+  }
+
+  // Filter projects that overlap with the quarter
+  const activeProjects = projects.filter(project => {
+    const projectStart = new Date(project.startDate);
+    const projectEnd = new Date(project.endDate);
+    return projectEnd >= startDate && projectStart <= endDate;
+  });
+
+  // Calculate total hours for the quarter
+  const totalHours = activeProjects.reduce((sum, project) => {
+    return sum + Object.values(project.resources || {}).reduce((projectSum, resource) => projectSum + (resource.hours || 0), 0);
+  }, 0);
+
+  // Calculate the number of months in the quarter
+  const monthsInQuarter = 3;
+
+  // Calculate average hours per month
+  const avgHoursPerMonth = Math.round(totalHours / monthsInQuarter);
+
+  return {
+    avgHoursPerMonth,
+    totalHours,
+    startDate,
+    endDate,
+    activeProjectsCount: activeProjects.length
+  };
+}
+
+/**
+ * Calculate the average hours per month for a preset range.
+ * @param {Array} projects - Array of project objects
+ * @param {string} range - Preset range: 'lastMonth', 'lastQuarter', 'lastYear', 'currentMonth', 'currentQuarter', 'currentYear', 'nextMonth', 'nextQuarter', 'nextYear'
+ * @returns {Object} Object containing the average hours per month for the range.
+ */
+export function calculateResourceRequirementsForRange(projects, range) {
+  const now = new Date();
+  let startDate, endDate;
+
+  switch (range) {
+    case 'lastMonth':
+      startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      endDate = new Date(now.getFullYear(), now.getMonth(), 0);
+      break;
+    case 'lastQuarter':
+      const lastQuarter = Math.floor(now.getMonth() / 3) - 1;
+      const lastQuarterYear = lastQuarter < 0 ? now.getFullYear() - 1 : now.getFullYear();
+      const adjustedLastQuarter = lastQuarter < 0 ? 3 : lastQuarter;
+      startDate = new Date(lastQuarterYear, adjustedLastQuarter * 3, 1);
+      endDate = new Date(lastQuarterYear, (adjustedLastQuarter + 1) * 3, 0);
+      break;
+    case 'lastYear':
+      startDate = new Date(now.getFullYear() - 1, 0, 1);
+      endDate = new Date(now.getFullYear() - 1, 11, 31);
+      break;
+    case 'currentMonth':
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      break;
+    case 'currentQuarter':
+      const currentQuarter = Math.floor(now.getMonth() / 3);
+      startDate = new Date(now.getFullYear(), currentQuarter * 3, 1);
+      endDate = new Date(now.getFullYear(), (currentQuarter + 1) * 3, 0);
+      break;
+    case 'currentYear':
+      startDate = new Date(now.getFullYear(), 0, 1);
+      endDate = new Date(now.getFullYear(), 11, 31);
+      break;
+    case 'nextMonth':
+      startDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      endDate = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+      break;
+    case 'nextQuarter':
+      const nextQuarter = Math.floor(now.getMonth() / 3) + 1;
+      const nextQuarterYear = nextQuarter > 3 ? now.getFullYear() + 1 : now.getFullYear();
+      const adjustedNextQuarter = nextQuarter > 3 ? 0 : nextQuarter;
+      startDate = new Date(nextQuarterYear, adjustedNextQuarter * 3, 1);
+      endDate = new Date(nextQuarterYear, (adjustedNextQuarter + 1) * 3, 0);
+      break;
+    case 'nextYear':
+      startDate = new Date(now.getFullYear() + 1, 0, 1);
+      endDate = new Date(now.getFullYear() + 1, 11, 31);
+      break;
+    default:
+      throw new Error('Invalid range specified');
+  }
+
+  // Initialize monthly totals
+  const monthlyTotals = {};
+  const monthlyProjectCounts = {};
+
+  // Helper to get month key
+  const getMonthKey = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+  // Initialize all months in range
+  const currentDate = new Date(startDate);
+  while (currentDate <= endDate) {
+    const monthKey = getMonthKey(currentDate);
+    monthlyTotals[monthKey] = 0;
+    monthlyProjectCounts[monthKey] = 0;
+    currentDate.setMonth(currentDate.getMonth() + 1);
+  }
+
+  // Calculate hours for each project
+  projects.forEach(project => {
+    const projectStart = new Date(project.startDate);
+    const projectEnd = new Date(project.endDate);
+    
+    // Skip projects that don't overlap with our range
+    if (projectEnd < startDate || projectStart > endDate) return;
+    
+    // Calculate total project hours
+    const totalProjectHours = Object.values(project.resources || {})
+      .reduce((sum, resource) => sum + (resource.hours || 0), 0);
+    
+    // Calculate project duration in months
+    const projectMonths = (projectEnd.getFullYear() - projectStart.getFullYear()) * 12 + 
+                         (projectEnd.getMonth() - projectStart.getMonth()) + 1;
+    
+    // Calculate hours per month for this project
+    const hoursPerMonth = Math.ceil(totalProjectHours / projectMonths);
+    
+    // Calculate the overlap with our range
+    const rangeStart = new Date(Math.max(projectStart, startDate));
+    const rangeEnd = new Date(Math.min(projectEnd, endDate));
+    
+    // Calculate the number of months in the overlap
+    const overlapMonths = (rangeEnd.getFullYear() - rangeStart.getFullYear()) * 12 + 
+                         (rangeEnd.getMonth() - rangeStart.getMonth()) + 1;
+    
+    // Calculate the total hours for the overlap period
+    const overlapHours = hoursPerMonth * overlapMonths;
+    
+    // Distribute hours across months within our range
+    const currentDate = new Date(rangeStart);
+    while (currentDate <= rangeEnd) {
+      const monthKey = getMonthKey(currentDate);
+      monthlyTotals[monthKey] += hoursPerMonth;
+      monthlyProjectCounts[monthKey]++;
+      currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+  });
+
+  // Calculate statistics
+  const monthlyValues = Object.values(monthlyTotals);
+  const maxHours = Math.max(...monthlyValues);
+  const minHours = Math.min(...monthlyValues);
+  const avgHoursPerMonth = Math.round(monthlyValues.reduce((sum, hours) => sum + hours, 0) / monthlyValues.length);
+  const totalHours = monthlyValues.reduce((sum, hours) => sum + hours, 0);
+
+  return {
+    avgHoursPerMonth,
+    totalHours,
+    maxHours,
+    minHours,
+    startDate,
+    endDate,
+    activeProjectsCount: Object.values(monthlyProjectCounts).reduce((sum, count) => sum + count, 0),
+    monthlyBreakdown: monthlyTotals
+  };
+}
+

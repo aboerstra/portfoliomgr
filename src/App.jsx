@@ -45,6 +45,7 @@ import { projects as initialProjects, valueStreams as initialValueStreams, resou
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu.jsx';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { calculateResourceRequirementsForRange } from './utils/resourceCalculator';
 
 function parseAsanaTasks(asanaJson, valueStreamId) {
   if (!asanaJson || !Array.isArray(asanaJson.data)) {
@@ -162,6 +163,7 @@ function PortfolioView() {
   const ganttChartRef = useRef();
   const [isImporting, setIsImporting] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedRange, setSelectedRange] = useState('currentQuarter');
 
   // Helper function to save data
   const saveData = (data) => {
@@ -676,6 +678,8 @@ function PortfolioView() {
     }
   };
 
+  const resourceData = calculateResourceRequirementsForRange(projects, selectedRange);
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
@@ -831,12 +835,22 @@ function PortfolioView() {
                       <div className="h-6 w-px bg-gray-300"></div>
                       <div className="flex items-center space-x-2">
                         <span className="text-sm text-gray-600">Required Hours:</span>
-                        <span className={`font-mono text-lg font-semibold ${
-                          avgHoursPerMonth > contractHours ? 'text-red-600' : 'text-green-600'
-                        }`}>
-                          {avgHoursPerMonth.toLocaleString()}
-                        </span>
-                        <span className="text-sm text-gray-500">hours/month</span>
+                        <span>{resourceData.avgHoursPerMonth} hours/month</span>
+                        <select
+                          value={selectedRange}
+                          onChange={(e) => setSelectedRange(e.target.value)}
+                          className="border rounded p-1"
+                        >
+                          <option value="lastYear">Last Year</option>
+                          <option value="lastQuarter">Last Quarter</option>
+                          <option value="lastMonth">Last Month</option>
+                          <option value="currentMonth">Current Month</option>
+                          <option value="currentQuarter">Current Quarter</option>
+                          <option value="currentYear">Current Year</option>
+                          <option value="nextMonth">Next Month</option>
+                          <option value="nextQuarter">Next Quarter</option>
+                          <option value="nextYear">Next Year</option>
+                        </select>
                       </div>
                       {contractHours > 0 && (
                         <>
@@ -844,13 +858,12 @@ function PortfolioView() {
                           <div className="flex items-center space-x-2">
                             <span className="text-sm text-gray-600">Status:</span>
                             <Badge variant="outline" className={
-                              avgHoursPerMonth > contractHours 
-                                ? 'bg-red-50 text-red-700 border-red-200' 
+                              resourceData.avgHoursPerMonth > contractHours ? 'bg-red-50 text-red-700 border-red-200' 
                                 : 'bg-green-50 text-green-700 border-green-200'
                             }>
-                              {avgHoursPerMonth > contractHours 
-                                ? `Over by ${(avgHoursPerMonth - contractHours).toLocaleString()} hours`
-                                : `Under by ${(contractHours - avgHoursPerMonth).toLocaleString()} hours`
+                              {resourceData.avgHoursPerMonth > contractHours 
+                                ? `Over by ${(resourceData.avgHoursPerMonth - contractHours).toLocaleString()} hours`
+                                : `Under by ${(contractHours - resourceData.avgHoursPerMonth).toLocaleString()} hours`
                               }
                             </Badge>
                           </div>
@@ -880,7 +893,7 @@ function PortfolioView() {
                 onUpdateProject={handleUpdateProject}
                 onDeleteProject={handleDeleteProject}
                 onReorderProjects={handleReorderProjects}
-                avgHoursPerMonth={avgHoursPerMonth}
+                avgHoursPerMonth={resourceData.avgHoursPerMonth}
                 chartRef={ganttChartRef}
               />
             </div>

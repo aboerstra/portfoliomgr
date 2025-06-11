@@ -38,6 +38,94 @@ const StatusIconWithTooltip = ({ tooltip, children }) => {
   );
 };
 
+// Add this new component after StatusIconWithTooltip
+const ProjectBarWithTooltip = ({ project, left, width, onDragStart, onDoubleClick, isDragging, valueStream }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [tooltipCoords, setTooltipCoords] = useState({ x: 0, y: 0 });
+
+  // Calculate project resource information
+  const totalHours = Object.values(project.resources || {})
+    .reduce((sum, resource) => sum + (resource.hours || 0), 0);
+  
+  const projectDuration = Math.ceil(
+    (new Date(project.endDate) - new Date(project.startDate)) / (1000 * 60 * 60 * 24 * 30)
+  );
+  
+  const avgMonthlyHours = Math.round(totalHours / projectDuration);
+  const progressPercentage = project.totalHours > 0 ? Math.round((project.hoursUsed / project.totalHours) * 100) : 0;
+
+  const handleMouseMove = (e) => {
+    setTooltipCoords({ x: e.clientX, y: e.clientY });
+  };
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+      onMouseMove={handleMouseMove}
+    >
+      <div 
+        className={`absolute rounded-md shadow-sm border border-gray-200 flex items-center justify-between px-2 cursor-move hover:shadow-md transition-shadow ${
+          isDragging ? 'shadow-lg z-20' : ''
+        }`}
+        style={{
+          top: 12,
+          height: 24,
+          left: `${left}%`,
+          width: `${width}%`,
+          backgroundColor: valueStream.color,
+          opacity: isDragging ? 0.9 : 0.8,
+          transform: isDragging ? 'scale(1.02)' : 'scale(1)',
+          transition: isDragging ? 'none' : 'all 0.2s ease-in-out'
+        }}
+        onMouseDown={(e) => onDragStart(e, project, 'move')}
+        onDoubleClick={(e) => onDoubleClick(e, project)}
+      >
+        {/* Start Date Handle */}
+        <div 
+          className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white hover:bg-opacity-20"
+          onMouseDown={(e) => onDragStart(e, project, 'start')}
+        />
+        <div className="text-white text-xs font-medium truncate">
+          {project.name}
+        </div>
+        <div className="ml-auto text-white text-xs font-semibold pr-1">
+          {progressPercentage}%
+        </div>
+        {/* End Date Handle */}
+        <div
+          className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white hover:bg-opacity-20"
+          onMouseDown={(e) => onDragStart(e, project, 'end')}
+        />
+      </div>
+      {showTooltip && createPortal(
+        <div
+          className="fixed px-3 py-2 rounded bg-black/90 text-white text-sm shadow-lg z-[9999]"
+          style={{ 
+            left: tooltipCoords.x + 12, 
+            top: tooltipCoords.y + 12,
+            pointerEvents: 'none',
+            minWidth: '200px'
+          }}
+        >
+          <div className="font-semibold mb-1">{project.name}</div>
+          <div className="text-xs space-y-1">
+            <div>Total Hours: {totalHours.toLocaleString()}</div>
+            <div>Hours Used: {project.hoursUsed?.toLocaleString() || 0}</div>
+            <div>Hours Remaining: {(totalHours - (project.hoursUsed || 0)).toLocaleString()}</div>
+            <div>Avg Monthly Hours: {avgMonthlyHours.toLocaleString()}</div>
+            <div>Duration: {projectDuration} months</div>
+            <div>Progress: {progressPercentage}%</div>
+            <div>Status: {project.status}</div>
+          </div>
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+};
+
 const GanttChart = ({ projects, valueStreams, selectedValueStream, onAddProject, onUpdateProject, onDeleteProject, onReorderProjects, resourceTypes = staticResourceTypes }) => {
   // Add state for expanded value streams
   const [expandedStreams, setExpandedStreams] = useState(new Set());
@@ -665,44 +753,7 @@ const GanttChart = ({ projects, valueStreams, selectedValueStream, onAddProject,
                               const topOffset = index * barHeight;
                               return (
                                 <div key={project.id} style={{ position: 'absolute', left: 0, right: 0, top: topOffset, height: barHeight, zIndex: 1 }}>
-                                  <div 
-                                    className={`absolute rounded-md shadow-sm border border-gray-200 flex items-center justify-between px-2 cursor-move hover:shadow-md transition-shadow ${
-                                      isDragging ? 'shadow-lg z-20' : ''
-                                    }`}
-                                    style={{
-                                      top: 12, // Center the bar vertically
-                                      height: 24, // Fixed bar height
-                                      left: `${projectTimelineData.leftPercent}%`,
-                                      width: `${projectTimelineData.widthPercent}%`,
-                                      backgroundColor: valueStream.color,
-                                      opacity: isDragging ? 0.9 : 0.8,
-                                      transform: isDragging ? 'scale(1.02)' : 'scale(1)',
-                                      transition: isDragging ? 'none' : 'all 0.2s ease-in-out'
-                                    }}
-                                    onMouseDown={(e) => handleDragStart(e, project, 'move')}
-                                    onDoubleClick={(e) => handleDoubleClick(e, project)}
-                                  >
-                                    {/* Start Date Handle */}
-                                    {projectTimelineData.isStartVisible && (
-                                      <div 
-                                        className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white hover:bg-opacity-20"
-                                        onMouseDown={(e) => handleDragStart(e, project, 'start')}
-                                      />
-                                    )}
-                                    <div className="text-white text-xs font-medium truncate">
-                                      {project.name}
-                                    </div>
-                                    <div className="ml-auto text-white text-xs font-semibold pr-1">
-                                      {project.totalHours > 0 ? Math.round((project.hoursUsed / project.totalHours) * 100) : 0}%
-                                    </div>
-                                    {/* End Date Handle */}
-                                    {projectTimelineData.isEndVisible && (
-                                      <div
-                                        className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-white hover:bg-opacity-20"
-                                        onMouseDown={(e) => handleDragStart(e, project, 'end')}
-                                      />
-                                    )}
-                                  </div>
+                                  <ProjectBarWithTooltip project={project} left={projectTimelineData.leftPercent} width={projectTimelineData.widthPercent} onDragStart={handleDragStart} onDoubleClick={handleDoubleClick} isDragging={isDragging} valueStream={valueStream} />
                                   {/* Milestones */}
                                   {project.milestones.map((milestone) => {
                                     const position = getMilestonePosition(milestone.date);
