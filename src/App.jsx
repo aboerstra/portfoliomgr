@@ -452,6 +452,9 @@ function PortfolioView() {
       if (!Array.isArray(data.resourceTypes)) {
         throw new Error('Resource Types must be an array');
       }
+      if (data.rocks && !Array.isArray(data.rocks)) {
+        throw new Error('Rocks must be an array');
+      }
       
       // Clean and normalize the data
       console.log('Cleaning and normalizing data...');
@@ -533,12 +536,22 @@ function PortfolioView() {
       
       // Then try to save to storage
       try {
-        localStorage.setItem('portfolioData', JSON.stringify(cleanData));
+        localStorage.setItem('portfolioData', JSON.stringify({
+          projects: cleanData.projects,
+          valueStreams: cleanData.valueStreams,
+          resourceTypes: cleanData.resourceTypes,
+          clientName: cleanData.clientName
+        }));
         console.log('Data saved to localStorage');
       } catch (localError) {
         console.warn('localStorage failed, trying sessionStorage:', localError);
         try {
-          sessionStorage.setItem('portfolioData', JSON.stringify(cleanData));
+          sessionStorage.setItem('portfolioData', JSON.stringify({
+            projects: cleanData.projects,
+            valueStreams: cleanData.valueStreams,
+            resourceTypes: cleanData.resourceTypes,
+            clientName: cleanData.clientName
+          }));
           console.log('Data saved to sessionStorage');
         } catch (sessionError) {
           console.warn('Both storage methods failed, but data is loaded in memory:', sessionError);
@@ -546,7 +559,16 @@ function PortfolioView() {
       }
       
       // Show success message
-      alert(`Successfully imported ${cleanData.projects.length} projects, ${cleanData.valueStreams.length} value streams, and ${cleanData.resourceTypes.length} resource types!`);
+      const message = [
+        `Successfully imported:`,
+        `- ${cleanData.projects.length} projects`,
+        `- ${cleanData.valueStreams.length} value streams`,
+        `- ${cleanData.resourceTypes.length} resource types`,
+        data.rocks ? `- ${cleanData.rocks.length} rocks` : null,
+        data.contractHours ? `- Contract hours: ${cleanData.contractHours}` : null,
+        data.clientName ? `- Client name: ${cleanData.clientName}` : null
+      ].filter(Boolean).join('\n');
+      alert(message);
       
       console.log('Import completed successfully');
     } catch (err) {
