@@ -51,6 +51,7 @@ import { calculateResourceRequirementsForRange } from './utils/resourceCalculato
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import HelpPage from '@/components/HelpPage';
+import ResourceChart from './components/ResourceChart.jsx';
 
 function parseAsanaTasks(asanaJson, valueStreamId) {
   if (!asanaJson || !Array.isArray(asanaJson.data)) {
@@ -389,6 +390,8 @@ function PortfolioView() {
       valueStreams,
       resourceTypes,
       clientName,
+      contractHours,
+      rocks: JSON.parse(localStorage.getItem('rocks') || '[]'),
       exportDate: new Date().toISOString(),
       version: '1.0'
     }
@@ -457,23 +460,36 @@ function PortfolioView() {
           ...project,
           id: String(project.id || Math.random().toString(36).substr(2, 9)),
           name: String(project.name || ''),
+          valueStreamId: String(project.valueStreamId || ''),
+          startDate: String(project.startDate || ''),
+          endDate: String(project.endDate || ''),
+          status: String(project.status || 'planned'),
+          priority: String(project.priority || 'medium'),
           description: String(project.description || ''),
-          startDate: project.startDate ? new Date(project.startDate).toISOString() : null,
-          endDate: project.endDate ? new Date(project.endDate).toISOString() : null,
-          valueStreamId: project.valueStreamId ? String(project.valueStreamId) : null,
-          resourceTypeId: project.resourceTypeId ? String(project.resourceTypeId) : null,
-          status: String(project.status || 'Not Started'),
-          priority: String(project.priority || 'Medium'),
           progress: Number(project.progress || 0),
-          resources: project.resources || {},
-          milestones: Array.isArray(project.milestones) ? project.milestones.map(milestone => ({
+          resources: Object.entries(project.resources || {}).reduce((acc, [key, value]) => ({
+            ...acc,
+            [key]: {
+              allocated: Number(value.allocated || 0),
+              required: Number(value.required || 0)
+            }
+          }), {}),
+          milestones: (project.milestones || []).map(milestone => ({
             ...milestone,
             id: String(milestone.id || Math.random().toString(36).substr(2, 9)),
             name: String(milestone.name || ''),
-            date: milestone.date ? new Date(milestone.date).toISOString() : null,
+            date: String(milestone.date || ''),
             status: String(milestone.status || 'planned')
-          })) : [],
-          asanaUrl: String(project.asanaUrl || '')
+          })),
+          asanaUrl: String(project.asanaUrl || ''),
+          resourceTypeId: project.resourceTypeId ? String(project.resourceTypeId) : null,
+          pmAllocation: Number(project.pmAllocation || 20),
+          autoPopulatePM: Boolean(project.autoPopulatePM),
+          estimatedHours: Number(project.estimatedHours || 0),
+          pmHours: Number(project.pmHours || 0),
+          totalHours: Number(project.totalHours || 0),
+          hoursUsed: Number(project.hoursUsed || 0),
+          simpleMode: Boolean(project.simpleMode)
         })),
         valueStreams: data.valueStreams.map(vs => ({
           ...vs,
@@ -492,7 +508,17 @@ function PortfolioView() {
           capacity: Number(rt.capacity || 1),
           color: String(rt.color || '#3B82F6')
         })),
-        clientName: data.clientName || clientName // Use existing clientName if not in imported data
+        clientName: data.clientName || clientName,
+        contractHours: Number(data.contractHours || 0),
+        rocks: (data.rocks || []).map(rock => ({
+          ...rock,
+          id: String(rock.id || Math.random().toString(36).substr(2, 9)),
+          valueStreamId: String(rock.valueStreamId || ''),
+          quarter: Number(rock.quarter || 1),
+          year: Number(rock.year || 2025),
+          name: String(rock.name || ''),
+          status: String(rock.status || 'not-started')
+        }))
       };
       
       console.log('Data cleaned and normalized. Proceeding with state update...');
@@ -501,6 +527,8 @@ function PortfolioView() {
       setProjects(cleanData.projects);
       setValueStreams(cleanData.valueStreams);
       setResourceTypes(cleanData.resourceTypes);
+      setContractHours(cleanData.contractHours);
+      localStorage.setItem('rocks', JSON.stringify(cleanData.rocks));
       console.log('State updated with imported data');
       
       // Then try to save to storage
@@ -914,6 +942,10 @@ function PortfolioView() {
         <div className={`flex-1 p-6 ${currentView === 'portfolio' ? '' : 'max-w-full'}`}>
           {currentView === 'portfolio' && (
             <div className="h-full">
+              {/* Resource requirements chart above the timeline */}
+              <div className="mb-6">
+                <ResourceChart projects={projects} resourceTypes={resourceTypes} />
+              </div>
               <div className="mb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
