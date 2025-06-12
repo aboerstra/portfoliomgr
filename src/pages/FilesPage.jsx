@@ -96,7 +96,10 @@ export default function FilesPage() {
             autoPopulatePM: Boolean(project.autoPopulatePM),
             estimatedHours: Number(project.estimatedHours || 0),
             pmHours: Number(project.pmHours || 0),
-            totalHours: Number(project.totalHours || 0),
+            totalHours: project.simpleMode ? 
+              Number(project.estimatedHours || 0) + Number(project.pmHours || 0) :
+              Object.values(project.resources || {})
+                .reduce((sum, resource) => sum + (Number(resource.hours) || 0), 0),
             hoursUsed: Number(project.hoursUsed || 0),
             simpleMode: Boolean(project.simpleMode)
           })),
