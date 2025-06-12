@@ -43,7 +43,7 @@ const StatusIconWithTooltip = ({ tooltip, children }) => {
 };
 
 // Add this new component after StatusIconWithTooltip
-const ProjectBarWithTooltip = ({ project, left, width, onDragStart, onDoubleClick, isDragging, valueStream }) => {
+const ProjectBarWithTooltip = ({ project, left, width, onDragStart, onDoubleClick, isDragging, valueStream, parentDeps, childDeps }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipCoords, setTooltipCoords] = useState({ x: 0, y: 0 });
 
@@ -124,6 +124,22 @@ const ProjectBarWithTooltip = ({ project, left, width, onDragStart, onDoubleClic
             <div>Duration: {projectDuration} months</div>
             <div>Progress: {progressPercentage}%</div>
             <div>Status: {project.status}</div>
+            {parentDeps?.length > 0 && (
+              <div>
+                Parent Deps:
+                <ul className="list-disc list-inside">
+                  {parentDeps.map(name => <li key={name}>{name}</li>)}
+                </ul>
+              </div>
+            )}
+            {childDeps?.length > 0 && (
+              <div>
+                Child Deps:
+                <ul className="list-disc list-inside">
+                  {childDeps.map(name => <li key={name}>{name}</li>)}
+                </ul>
+              </div>
+            )}
           </div>
         </div>,
         document.body
@@ -147,6 +163,9 @@ const GanttChart = ({ projects, valueStreams, selectedValueStream, onAddProject,
   const [dragOverValueStreamId, setDragOverValueStreamId] = useState(null);
   const [openPriorityPopover, setOpenPriorityPopover] = useState(null);
   const [hideOutOfViewProjects, setHideOutOfViewProjects] = useState(false);
+  const [showDependencies, setShowDependencies] = useState(false);
+  const [barRefs, setBarRefs] = useState({});
+  const timelineAreaRef = useRef(null);
 
   const monthOptions = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -771,7 +790,30 @@ const GanttChart = ({ projects, valueStreams, selectedValueStream, onAddProject,
                               const topOffset = index * barHeight;
                               return (
                                 <div key={project.id} style={{ position: 'absolute', left: 0, right: 0, top: topOffset, height: barHeight, zIndex: 1 }}>
-                                  <ProjectBarWithTooltip project={project} left={projectTimelineData.leftPercent} width={projectTimelineData.widthPercent} onDragStart={handleDragStart} onDoubleClick={handleDoubleClick} isDragging={isDragging} valueStream={valueStream} />
+                                  {(() => {
+                                    const parentNames = (project.dependencies || [])
+                                      .map(id => {
+                                        const p = projects.find(pr => pr.id === id);
+                                        return p ? p.name : null;
+                                      })
+                                      .filter(Boolean);
+                                    const childNames = projects
+                                      .filter(pr => (pr.dependencies || []).includes(project.id))
+                                      .map(pr => pr.name);
+                                    return (
+                                      <ProjectBarWithTooltip
+                                        project={project}
+                                        left={projectTimelineData.leftPercent}
+                                        width={projectTimelineData.widthPercent}
+                                        onDragStart={handleDragStart}
+                                        onDoubleClick={handleDoubleClick}
+                                        isDragging={isDragging}
+                                        valueStream={valueStream}
+                                        parentDeps={parentNames}
+                                        childDeps={childNames}
+                                      />
+                                    );
+                                  })()}
                                   {/* Milestones */}
                                   {project.milestones.map((milestone) => {
                                     const position = getMilestonePosition(milestone.date);

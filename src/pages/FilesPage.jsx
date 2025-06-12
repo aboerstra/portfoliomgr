@@ -101,7 +101,8 @@ export default function FilesPage() {
               Object.values(project.resources || {})
                 .reduce((sum, resource) => sum + (Number(resource.hours) || 0), 0),
             hoursUsed: Number(project.hoursUsed || 0),
-            simpleMode: Boolean(project.simpleMode)
+            simpleMode: Boolean(project.simpleMode),
+            dependencies: Array.isArray(project.dependencies) ? project.dependencies : []
           })),
           valueStreams: data.valueStreams.map(vs => ({
             ...vs,
@@ -135,7 +136,10 @@ export default function FilesPage() {
 
         // Save to localStorage
         localStorage.setItem('portfolioData', JSON.stringify({
-          projects: cleanData.projects,
+          projects: cleanData.projects.map(project => ({
+            ...project,
+            dependencies: Array.isArray(project.dependencies) ? project.dependencies : []
+          })),
           valueStreams: cleanData.valueStreams,
           resourceTypes: cleanData.resourceTypes,
           clientName: cleanData.clientName

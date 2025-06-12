@@ -12,6 +12,7 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar.jsx';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.jsx';
 import { cn } from '@/lib/utils.js';
 import { Switch } from '@/components/ui/switch.jsx';
+import { MultiSelect } from '@/components/ui/multiselect';
 
 // Add resource types definition
 const resourceTypes = [
@@ -30,7 +31,8 @@ const ProjectForm = ({
   resourceTypes = [],
   valueStreams = [],
   editingProject = null,
-  onDelete
+  onDelete,
+  projects = []
 }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -50,7 +52,8 @@ const ProjectForm = ({
     totalHours: 0,
     simpleMode: false,
     estimatedHours: 0,
-    pmHours: 0
+    pmHours: 0,
+    dependencies: []
   });
 
   const [newMilestone, setNewMilestone] = useState({
@@ -97,7 +100,8 @@ const ProjectForm = ({
             (editingProject.estimatedHours || 0) + pmHours :
             Object.values(editingProject.resources || {})
               .filter(resource => resource.id !== 'rt-1')
-              .reduce((sum, resource) => sum + (resource.hours || 0), 0) + pmHours
+              .reduce((sum, resource) => sum + (resource.hours || 0), 0) + pmHours,
+          dependencies: Array.isArray(editingProject?.dependencies) ? editingProject.dependencies : []
         });
         setStartDate(editingProject.startDate ? new Date(editingProject.startDate) : null);
         setEndDate(editingProject.endDate ? new Date(editingProject.endDate) : null);
@@ -120,7 +124,8 @@ const ProjectForm = ({
           totalHours: 0,
           simpleMode: false,
           estimatedHours: 0,
-          pmHours: 0
+          pmHours: 0,
+          dependencies: []
         });
         setStartDate(null);
         setEndDate(null);
@@ -417,7 +422,8 @@ const ProjectForm = ({
         pmAllocation: 20,
         autoPopulatePM: false,
         hoursUsed: 0,
-        totalHours: 0
+        totalHours: 0,
+        dependencies: []
       });
       
       onClose();
@@ -610,6 +616,44 @@ const ProjectForm = ({
                 placeholder="Enter project description"
                 rows={3}
               />
+            </div>
+
+            <div>
+              <Label htmlFor="dependencies">Depends on (parent dependencies)</Label>
+              <MultiSelect
+                id="dependencies"
+                options={projects
+                  .filter(p => !editingProject || p.id !== editingProject.id)
+                  .map(p => ({ value: p.id, label: p.name }))
+                  .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }))}
+                value={formData.dependencies}
+                onChange={selected => setFormData(prev => ({ ...prev, dependencies: selected }))}
+                placeholder="Select projects this depends on"
+              />
+              <div className="text-xs text-gray-500 mt-1">
+                Tip: Hold Ctrl (Windows) or ⌘ Cmd (Mac) while clicking to select or deselect multiple projects.
+              </div>
+              {/* Show child dependencies (projects depending on this) when editing */}
+              {editingProject && (
+                (() => {
+                  const childList = projects
+                    .filter(pr => (pr.dependencies || []).includes(editingProject.id))
+                    .map(pr => pr.name)
+                    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+                  return (
+                    <div className="mt-2 text-sm">
+                      <Label>Projects depending on this</Label>
+                      {childList.length > 0 ? (
+                        <ul className="list-disc list-inside ml-4">
+                          {childList.map(name => <li key={name}>{name}</li>)}
+                        </ul>
+                      ) : (
+                        <div className="ml-4 text-gray-500">None</div>
+                      )}
+                    </div>
+                  );
+                })()
+              )}
             </div>
           </div>
 

@@ -121,6 +121,7 @@ function parseAsanaTasks(asanaJson, valueStreamId) {
         resources: {},
         milestones: [],
         asanaUrl: task.permalink_url || '',
+        dependencies: Array.isArray(task.dependencies) ? task.dependencies : [],
       };
 
       // Find any milestone tasks that are subtasks of this task
@@ -495,7 +496,8 @@ function PortfolioView() {
             Object.values(project.resources || {})
               .reduce((sum, resource) => sum + (Number(resource.hours) || 0), 0),
           hoursUsed: Number(project.hoursUsed || 0),
-          simpleMode: Boolean(project.simpleMode)
+          simpleMode: Boolean(project.simpleMode),
+          dependencies: Array.isArray(project.dependencies) ? project.dependencies : []
         })),
         valueStreams: data.valueStreams.map(vs => ({
           ...vs,
@@ -530,7 +532,10 @@ function PortfolioView() {
       console.log('Data cleaned and normalized. Proceeding with state update...');
       
       // Update state with imported data first
-      setProjects(cleanData.projects);
+      setProjects(cleanData.projects.map(project => ({
+        ...project,
+        dependencies: Array.isArray(project.dependencies) ? project.dependencies : []
+      })));
       setValueStreams(cleanData.valueStreams);
       setResourceTypes(cleanData.resourceTypes);
       setContractHours(cleanData.contractHours);
@@ -540,7 +545,10 @@ function PortfolioView() {
       // Then try to save to storage
       try {
         localStorage.setItem('portfolioData', JSON.stringify({
-          projects: cleanData.projects,
+          projects: cleanData.projects.map(project => ({
+            ...project,
+            dependencies: Array.isArray(project.dependencies) ? project.dependencies : []
+          })),
           valueStreams: cleanData.valueStreams,
           resourceTypes: cleanData.resourceTypes,
           clientName: cleanData.clientName
@@ -550,7 +558,10 @@ function PortfolioView() {
         console.warn('localStorage failed, trying sessionStorage:', localError);
         try {
           sessionStorage.setItem('portfolioData', JSON.stringify({
-            projects: cleanData.projects,
+            projects: cleanData.projects.map(project => ({
+              ...project,
+              dependencies: Array.isArray(project.dependencies) ? project.dependencies : []
+            })),
             valueStreams: cleanData.valueStreams,
             resourceTypes: cleanData.resourceTypes,
             clientName: cleanData.clientName
@@ -1188,6 +1199,7 @@ function PortfolioView() {
         valueStreams={valueStreams}
         editingProject={editingProject}
         onDelete={handleDeleteProject}
+        projects={projects}
       />
       
       {/* Hidden file input for import */}
