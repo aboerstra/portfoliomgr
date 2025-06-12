@@ -48,15 +48,17 @@ const ProjectBarWithTooltip = ({ project, left, width, onDragStart, onDoubleClic
   const [tooltipCoords, setTooltipCoords] = useState({ x: 0, y: 0 });
 
   // Calculate project resource information
-  const totalHours = Object.values(project.resources || {})
-    .reduce((sum, resource) => sum + (resource.hours || 0), 0);
+  const totalHours = project.simpleMode ? 
+    (project.estimatedHours || 0) + (project.pmHours || 0) :
+    Object.values(project.resources || {})
+      .reduce((sum, resource) => sum + (resource.hours || 0), 0);
   
   const projectDuration = Math.ceil(
     (new Date(project.endDate) - new Date(project.startDate)) / (1000 * 60 * 60 * 24 * 30)
   );
   
   const avgMonthlyHours = Math.round(totalHours / projectDuration);
-  const progressPercentage = project.totalHours > 0 ? Math.round((project.hoursUsed / project.totalHours) * 100) : 0;
+  const progressPercentage = totalHours > 0 ? Math.round(((project.hoursUsed || 0) / totalHours) * 100) : 0;
 
   const handleMouseMove = (e) => {
     setTooltipCoords({ x: e.clientX, y: e.clientY });
@@ -116,7 +118,7 @@ const ProjectBarWithTooltip = ({ project, left, width, onDragStart, onDoubleClic
           <div className="font-semibold mb-1">{project.name}</div>
           <div className="text-xs space-y-1">
             <div>Total Hours: {totalHours.toLocaleString()}</div>
-            <div>Hours Used: {project.hoursUsed?.toLocaleString() || 0}</div>
+            <div>Hours Used: {(project.hoursUsed || 0).toLocaleString()}</div>
             <div>Hours Remaining: {(totalHours - (project.hoursUsed || 0)).toLocaleString()}</div>
             <div>Avg Monthly Hours: {avgMonthlyHours.toLocaleString()}</div>
             <div>Duration: {projectDuration} months</div>
